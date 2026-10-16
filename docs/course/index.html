@@ -1,0 +1,1311 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AERIS-10 зсередини</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: курс-підручник. Ліва колонка зі змістом (липка на десктопі, гортається зверху на телефоні), праворуч один модуль за раз. Палітра приладової панелі: сіро-зелений ґрунт, глибокий бірюзовий акцент, помаранчевий для цілей і детекцій. */
+:root {
+  --bg: #eef2f0;
+  --surface: #ffffff;
+  --surface-2: #e4ebe8;
+  --ink: #142120;
+  --muted: #566663;
+  --line: #cfd9d6;
+  --accent: #0b6b5a;
+  --accent-soft: #d3ebe4;
+  --hot: #c2410c;
+  --hot-soft: #fbe3d6;
+  --trace: #1f5fa6;
+  --ok: #1b7a3e;
+  --bad: #b42323;
+  --font-display: "Unbounded", "Commissioner", system-ui, sans-serif;
+  --font-body: "Commissioner", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1: 0.84rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.5rem;
+  --step-3: 2rem;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1513; --surface: #151e1c; --surface-2: #1c2725; --ink: #dce6e3; --muted: #93a39f;
+    --line: #2a3734; --accent: #46c2a6; --accent-soft: #163a33; --hot: #f28c4e; --hot-soft: #3a2316;
+    --trace: #79aee9; --ok: #5ccf86; --bad: #f07272; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1513; --surface: #151e1c; --surface-2: #1c2725; --ink: #dce6e3; --muted: #93a39f;
+  --line: #2a3734; --accent: #46c2a6; --accent-soft: #163a33; --hot: #f28c4e; --hot-soft: #3a2316;
+  --trace: #79aee9; --ok: #5ccf86; --bad: #f07272; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: var(--step-0);
+  line-height: 1.6; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.shell { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 40px; padding-block: 32px 64px; }
+@media (max-width: 900px) { .shell { grid-template-columns: minmax(0, 1fr); gap: 20px; padding-block: 16px 48px; } }
+
+/* --- навігація --- */
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 20px); align-self: start; display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 900px) { nav.toc { position: static; } }
+.brand { display: flex; flex-direction: column; gap: 2px; }
+.brand .kicker { font-size: var(--step--1); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.brand h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; line-height: 1.2; margin: 0; text-wrap: balance; }
+.progress { display: flex; align-items: center; gap: 10px; font-size: var(--step--1); color: var(--muted); }
+.progress .bar { flex: 1; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+.toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+@media (max-width: 900px) { .toc ol { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 6px; } }
+.toc a { display: grid; grid-template-columns: 28px 1fr 16px; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 8px; color: var(--ink); text-decoration: none; font-size: .95rem; line-height: 1.3; }
+@media (max-width: 900px) { .toc a { white-space: nowrap; grid-template-columns: auto auto auto; background: var(--surface); border: 1px solid var(--line); } }
+.toc a:hover { background: var(--surface-2); }
+.toc a[aria-current="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.toc .n { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.toc .done { color: var(--ok); font-size: .85rem; visibility: hidden; }
+.toc a.is-done .done { visibility: visible; }
+.toc-note { font-size: var(--step--1); color: var(--muted); margin: 0; }
+@media (max-width: 900px) { .toc-note { display: none; } }
+
+/* --- модулі --- */
+main { min-width: 0; }
+section.mod { display: none; flex-direction: column; gap: 22px; }
+section.mod.active { display: flex; }
+.mod-head { display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid var(--line); padding-bottom: 18px; }
+.mod-head .eyebrow { font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+.mod-head h2 { font-family: var(--font-display); font-weight: 500; font-size: var(--step-3); line-height: 1.15; margin: 0; text-wrap: balance; }
+.mod-head .lead { font-size: var(--step-1); color: var(--muted); margin: 0; max-width: 62ch; line-height: 1.5; }
+.prose { max-width: 68ch; display: flex; flex-direction: column; gap: 12px; }
+.prose p, .prose ul, .prose ol { margin: 0; }
+.prose ul, .prose ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 4px; }
+h3 { font-size: var(--step-2); font-weight: 600; margin: 8px 0 0; line-height: 1.25; text-wrap: balance; }
+h4 { font-size: var(--step-1); font-weight: 600; margin: 4px 0 0; }
+code, .mono { font-family: var(--font-mono); font-size: .88em; }
+:not(pre) > code { background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre { margin: 0; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.formula { font-family: var(--font-mono); background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 6px; overflow-x: auto; white-space: nowrap; font-size: .95rem; }
+.formula small { display: block; white-space: normal; font-family: var(--font-body); color: var(--muted); font-size: var(--step--1); margin-top: 4px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: var(--step--1); color: var(--muted); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; background: var(--surface-2); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* блок "у репозиторії" */
+.repo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.repo h4 { margin: 0; font-size: var(--step--1); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.repo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.repo li { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 4px 14px; }
+@media (max-width: 640px) { .repo li { grid-template-columns: minmax(0, 1fr); } }
+.repo li a { font-family: var(--font-mono); font-size: .84rem; overflow-wrap: anywhere; }
+.repo li span { color: var(--muted); font-size: .93rem; }
+
+.callout { border-radius: var(--radius); padding: 12px 16px; background: var(--accent-soft); max-width: 68ch; }
+.callout.warn { background: var(--hot-soft); }
+.callout strong { display: block; margin-bottom: 2px; }
+
+/* інтерактив */
+.lab { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+.lab-title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.lab-title h4 { margin: 0; }
+.lab-title .tag { font-size: var(--step--1); color: var(--accent); font-family: var(--font-mono); }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px 18px; }
+.ctl { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; min-width: 0; }
+.ctl label { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); }
+.ctl label output { color: var(--ink); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ctl input[type=range] { width: 100%; accent-color: var(--accent); }
+.ctl input[type=number], .ctl select { font: inherit; font-size: .9rem; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); width: 100%; }
+.check, .ctl label.check { display: flex; justify-content: flex-start; align-items: center; gap: 8px; font-size: .9rem; cursor: pointer; color: var(--ink); }
+[hidden] { display: none !important; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+canvas.plot { width: 100%; height: 260px; display: block; background: var(--bg); border-radius: 8px; }
+canvas.plot.tall { height: 340px; }
+.readout { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .9rem; }
+.readout div { display: flex; flex-direction: column; }
+.readout span { color: var(--muted); font-size: var(--step--1); }
+.readout b { font-family: var(--font-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* діаграма */
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.diagram svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.diagram text { font-family: var(--font-body); fill: var(--ink); font-size: 12px; }
+.diagram .sub { fill: var(--muted); font-size: 10.5px; }
+.diagram .blk { fill: var(--surface-2); stroke: var(--line); }
+.diagram .blk.fpga { fill: var(--accent-soft); stroke: var(--accent); }
+.diagram .blk.rf { fill: var(--hot-soft); stroke: var(--hot); }
+.diagram .wire { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.diagram .zone { fill: none; stroke: var(--accent); stroke-dasharray: 4 4; }
+.diagram .zl { fill: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .05em; }
+.diagram a { cursor: pointer; }
+.diagram a:hover .blk { stroke-width: 2; }
+.diagram .arrowhead { fill: var(--muted); }
+
+/* квіз */
+.quiz { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 18px; }
+.quiz > h4 { margin: 0; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.quiz > h4 small { font-weight: 400; color: var(--muted); font-size: var(--step--1); }
+.q { display: flex; flex-direction: column; gap: 8px; }
+.q > p { margin: 0; font-weight: 500; }
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt { text-align: left; font: inherit; font-size: .95rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt.right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--bg)); }
+.opt.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--bg)); }
+.why { margin: 0; font-size: .92rem; color: var(--muted); }
+
+.pager { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 18px; }
+.btn { font: inherit; font-size: .95rem; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn.small { font-size: .85rem; padding: 6px 12px; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.grid2 > * { min-width: 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.card h4 { margin: 0; font-size: 1.02rem; }
+.card p { margin: 0; font-size: .93rem; color: var(--muted); }
+.card .mono { color: var(--accent); }
+
+.det-list { font-family: var(--font-mono); font-size: .82rem; max-height: 180px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 8px 10px; margin: 0; white-space: pre; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: var(--step--1); color: var(--muted); }
+.legend i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+.tgt-table input { width: 84px; font: inherit; font-size: .85rem; padding: 3px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--bg); color: var(--ink); }
+.tgt-table td, .tgt-table th { padding: 5px 8px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="toc" aria-label="Зміст курсу">
+    <div class="brand">
+      <span class="kicker">Курс по репозиторію PLFM_RADAR</span>
+      <h1>AERIS-10 зсередини</h1>
+    </div>
+    <div class="progress"><div class="bar"><i id="progBar"></i></div><span id="progText">0 / 9</span></div>
+    <ol id="tocList"></ol>
+    <p class="toc-note">Модуль позначається пройденим, коли на всі питання самоперевірки дано правильну відповідь. Прогрес зберігається лише в цьому браузері.</p>
+  </nav>
+
+  <main id="main">
+
+<!-- ============================================================ M1 -->
+<section class="mod" id="m1" data-title="Огляд системи">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 1 · карта проєкту</span>
+    <h2>Що таке AERIS-10 і як по ньому йде сигнал</h2>
+    <p class="lead">Імпульсний радар із лінійною частотною модуляцією (ЛЧМ, англ. Pulse LFM) на 10,5 ГГц з фазованою антенною решіткою. Спершу тримаємо в голові всю картину, далі кожен модуль розбирає один блок.</p>
+  </header>
+
+  <div class="prose">
+    <p>Радар випромінює короткі «свисти» (chirp), у яких частота лінійно росте або падає, слухає відлуння, а FPGA перетворює сирі відліки АЦП на карту «дальність × швидкість» і вирішує, де ціль. Променем керують електронно (фазообертачі ADAR1000) по куту місця і механічно (кроковий двигун) по азимуту.</p>
+  </div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Параметр</th><th>AERIS-10N (Nexus)</th><th>AERIS-10E (Extended)</th></tr></thead>
+    <tbody>
+      <tr><td>Частота</td><td class="num">10,5 ГГц (λ ≈ 2,86 см)</td><td class="num">10,5 ГГц</td></tr>
+      <tr><td>Дальність</td><td class="num">3 км</td><td class="num">20 км</td></tr>
+      <tr><td>Антена</td><td>8×16 патч-решітка</td><td>32×16 щілинна хвилевідна</td></tr>
+      <tr><td>Потужність</td><td class="num">≈1 Вт × 16</td><td class="num">10 Вт × 16 (GaN QPA2962)</td></tr>
+      <tr><td>Сканування</td><td colspan="2">±45° електронно, 360° механічно</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Шлях сигналу</h3>
+  <p class="why">Натисни на блок, щоб перейти до модуля, де він розібраний.</p>
+  <div class="diagram">
+    <svg viewBox="0 0 980 330" role="img" aria-label="Блок-схема шляху сигналу AERIS-10">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"></path></marker></defs>
+      <!-- TX row -->
+      <text x="10" y="22" class="zl">ПЕРЕДАВАННЯ</text>
+      <a data-go="m3"><rect class="blk fpga" x="10" y="34" width="130" height="50" rx="7"></rect><text x="22" y="56">Таблиця chirp</text><text x="22" y="72" class="sub">FPGA, 120 МГц</text></a>
+      <a data-go="m3"><rect class="blk" x="165" y="34" width="110" height="50" rx="7"></rect><text x="177" y="56">ЦАП</text><text x="177" y="72" class="sub">8 біт, ЛЧМ 20 МГц</text></a>
+      <a data-go="m5"><rect class="blk rf" x="300" y="34" width="130" height="50" rx="7"></rect><text x="312" y="56">Змішувач TX</text><text x="312" y="72" class="sub">LTC5552, LO 10,5 ГГц</text></a>
+      <a data-go="m4"><rect class="blk rf" x="455" y="34" width="140" height="50" rx="7"></rect><text x="467" y="56">4× ADAR1000</text><text x="467" y="72" class="sub">фаза й підсилення, 16 кан.</text></a>
+      <a data-go="m4"><rect class="blk rf" x="620" y="34" width="130" height="50" rx="7"></rect><text x="632" y="56">16× ADTR1107</text><text x="632" y="72" class="sub">PA (TX) / LNA (RX)</text></a>
+      <a data-go="m4"><rect class="blk rf" x="775" y="34" width="110" height="114" rx="7"></rect><text x="787" y="86">Антена</text><text x="787" y="102">решітка</text></a>
+      <path class="wire" d="M140,59 H163" marker-end="url(#ah)"></path>
+      <path class="wire" d="M275,59 H298" marker-end="url(#ah)"></path>
+      <path class="wire" d="M430,59 H453" marker-end="url(#ah)"></path>
+      <path class="wire" d="M595,59 H618" marker-end="url(#ah)"></path>
+      <path class="wire" d="M750,59 H773" marker-end="url(#ah)"></path>
+      <!-- RX row -->
+      <text x="10" y="120" class="zl">ПРИЙМАННЯ</text>
+      <path class="wire" d="M775,124 H752" marker-end="url(#ah)"></path>
+      <a data-go="m4"><rect class="blk rf" x="620" y="100" width="130" height="44" rx="7"></rect><text x="632" y="120">LNA → ADAR1000</text><text x="632" y="135" class="sub">сумування променя</text></a>
+      <path class="wire" d="M620,122 H597" marker-end="url(#ah)"></path>
+      <a data-go="m5"><rect class="blk rf" x="455" y="100" width="140" height="44" rx="7"></rect><text x="467" y="120">Змішувач RX</text><text x="467" y="135" class="sub">LO 10,38 ГГц → ПЧ 120 МГц</text></a>
+      <path class="wire" d="M455,122 H432" marker-end="url(#ah)"></path>
+      <a data-go="m5"><rect class="blk" x="300" y="100" width="130" height="44" rx="7"></rect><text x="312" y="120">АЦП AD9484</text><text x="312" y="135" class="sub">8 біт, 400 МВ/с</text></a>
+      <path class="wire" d="M365,144 V180" marker-end="url(#ah)"></path>
+      <!-- FPGA chain -->
+      <rect class="zone" x="10" y="168" width="960" height="92" rx="10"></rect>
+      <text x="22" y="186" class="zl">FPGA XC7A50T · 100 МГц після DDC</text>
+      <a data-go="m5"><rect class="blk fpga" x="22" y="196" width="104" height="52" rx="7"></rect><text x="32" y="218">DDC</text><text x="32" y="234" class="sub">NCO, CIC, FIR</text></a>
+      <a data-go="m5"><rect class="blk fpga" x="138" y="196" width="80" height="52" rx="7"></rect><text x="148" y="218">AGC</text><text x="148" y="234" class="sub">зсув 2ⁿ</text></a>
+      <a data-go="m3"><rect class="blk fpga" x="230" y="196" width="118" height="52" rx="7"></rect><text x="240" y="218">Узгодж. фільтр</text><text x="240" y="234" class="sub">FFT 1024</text></a>
+      <a data-go="m6"><rect class="blk fpga" x="360" y="196" width="104" height="52" rx="7"></rect><text x="370" y="218">Децимація</text><text x="370" y="234" class="sub">1024 → 64 біни</text></a>
+      <a data-go="m7"><rect class="blk fpga" x="476" y="196" width="80" height="52" rx="7"></rect><text x="486" y="218">MTI</text><text x="486" y="234" class="sub">1 − z⁻¹</text></a>
+      <a data-go="m6"><rect class="blk fpga" x="568" y="196" width="104" height="52" rx="7"></rect><text x="578" y="218">Доплер FFT</text><text x="578" y="234" class="sub">2 × 16 точок</text></a>
+      <a data-go="m7"><rect class="blk fpga" x="684" y="196" width="80" height="52" rx="7"></rect><text x="694" y="218">DC notch</text><text x="694" y="234" class="sub">нуль біни</text></a>
+      <a data-go="m8"><rect class="blk fpga" x="776" y="196" width="80" height="52" rx="7"></rect><text x="786" y="218">CFAR</text><text x="786" y="234" class="sub">CA/GO/SO</text></a>
+      <a data-go="m9"><rect class="blk fpga" x="868" y="196" width="90" height="52" rx="7"></rect><text x="878" y="218">USB</text><text x="878" y="234" class="sub">FT2232H</text></a>
+      <path class="wire" d="M126,222 H136" marker-end="url(#ah)"></path>
+      <path class="wire" d="M218,222 H228" marker-end="url(#ah)"></path>
+      <path class="wire" d="M348,222 H358" marker-end="url(#ah)"></path>
+      <path class="wire" d="M464,222 H474" marker-end="url(#ah)"></path>
+      <path class="wire" d="M556,222 H566" marker-end="url(#ah)"></path>
+      <path class="wire" d="M672,222 H682" marker-end="url(#ah)"></path>
+      <path class="wire" d="M764,222 H774" marker-end="url(#ah)"></path>
+      <path class="wire" d="M856,222 H866" marker-end="url(#ah)"></path>
+      <!-- control -->
+      <a data-go="m4"><rect class="blk" x="22" y="276" width="420" height="44" rx="7"></rect><text x="34" y="296">STM32F746: живлення, тактування AD9523, синтезатори ADF4382,</text><text x="34" y="311" class="sub">ADAR1000 по SPI, кроковий двигун, GPS/IMU, температура, Idq підсилювачів</text></a>
+      <a data-go="m9"><rect class="blk" x="760" y="276" width="198" height="44" rx="7"></rect><text x="772" y="296">Python GUI</text><text x="772" y="311" class="sub">карта, трекінг, команди</text></a>
+      <path class="wire" d="M913,248 V274" marker-end="url(#ah)"></path>
+    </svg>
+  </div>
+
+  <h3>Хто за що відповідає</h3>
+  <div class="grid2">
+    <div class="card"><h4>FPGA</h4><p class="mono">9_Firmware/9_2_FPGA</p><p>Генерує chirp, приймає 400 МВ/с з АЦП, робить усю цифрову обробку аж до детекцій і віддає їх по USB. Тут основна математика курсу.</p></div>
+    <div class="card"><h4>STM32</h4><p class="mono">9_Firmware/9_1_Microcontroller</p><p>Диригент: вмикає живлення в правильному порядку, налаштовує синтезатори й фазообертачі, задає послідовність chirp і крутить двигун.</p></div>
+    <div class="card"><h4>Python GUI</h4><p class="mono">9_Firmware/9_3_GUI</p><p>Розбирає USB-пакети, малює карту дальність-Доплер, накладає цілі на мапу з урахуванням GPS і нахилу, надсилає команди.</p></div>
+  </div>
+
+  <h3>Як влаштований один оберт</h3>
+  <div class="prose">
+    <p>У прошивці STM32 (<code>main.cpp</code>) задано три вкладені цикли:</p>
+    <ul>
+      <li><b>32 chirp на одну позицію променя</b>: 16 довгих (30 мкс, період 167 мкс), пауза-гард 175,4 мкс, 16 коротких (0,5 мкс, період 175 мкс). Разом ≈ 5,65 мс.</li>
+      <li><b>31 позиція по куту місця</b> (електронне керування ADAR1000), ≈ 175 мс.</li>
+      <li><b>50 позицій по азимуту</b> на оберт (крок 7,2°, кроковий двигун), ≈ 8,8 с без урахування часу повороту.</li>
+    </ul>
+    <p>Тривалості пораховано з констант <code>PRI1</code>, <code>PRI2</code>, <code>Guard</code> у <code>main.cpp</code>; реальний оберт довший через рух двигуна і запис регістрів.</p>
+  </div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="README.md">README.md</a><span>Архітектура, специфікації, ліцензії.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/radar_system_top.v">radar_system_top.v</a><span>Верхній модуль FPGA: з'єднує передавач, приймач, CFAR, USB і регістри команд.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/radar_receiver_final.v">radar_receiver_final.v</a><span>Увесь приймальний ланцюг по порядку. Найкорисніший файл для першого читання.</span></li>
+    <li><a data-src="9_Firmware/9_1_Microcontroller/9_1_3_C_Cpp_Code/main.cpp">main.cpp</a><span>Прошивка STM32: параметри сканування, <code>executeChirpSequence</code>.</span></li>
+    <li><a data-src="docs/architecture.html">docs/architecture.html</a><span>Короткий опис архітектури від авторів.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m1"><h4>Самоперевірка <small>3 питання</small></h4>
+    <div class="q" data-a="2"><p>Який блок перетворює відліки АЦП на виявлені цілі?</p><div class="opts"><button class="opt">STM32</button><button class="opt">ADAR1000</button><button class="opt">FPGA</button><button class="opt">Python GUI</button></div><p class="why" hidden>Уся цифрова обробка від DDC до CFAR живе у FPGA. GUI займається вже трекінгом і відображенням.</p></div>
+    <div class="q" data-a="1"><p>Як радар сканує по азимуту?</p><div class="opts"><button class="opt">Електронно, фазою ADAR1000</button><button class="opt">Механічно, кроковим двигуном, 50 позицій на оберт</button><button class="opt">Перемиканням між двома антенами</button></div><p class="why" hidden>Електронне керування використовується по куту місця (31 позиція), а азимут перебирає двигун.</p></div>
+    <div class="q" data-a="0"><p>Скільки chirp випромінюється на одну позицію променя?</p><div class="opts"><button class="opt">32: 16 довгих і 16 коротких</button><button class="opt">1024</button><button class="opt">50</button></div><p class="why" hidden>32 chirp, і саме вони стають «повільним часом» для доплерівського FFT у модулі 6.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M2 -->
+<section class="mod" id="m2" data-title="Основи радіолокації">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 2 · теорія</span>
+    <h2>Дальність, роздільність, Доплер і рівняння радіолокації</h2>
+    <p class="lead">П'ять формул, на яких тримається весь проєкт. Підставляємо в них реальні параметри AERIS-10.</p>
+  </header>
+
+  <h3>Дальність і роздільність</h3>
+  <div class="prose">
+    <p>Сигнал іде до цілі й назад, тому затримка луни <i>t</i> відповідає дальності половини шляху. Одна мікросекунда затримки означає 150 м.</p>
+  </div>
+  <div class="formula">R = c · t / 2<small>c = 3·10⁸ м/с. Луна з 3 км приходить через 20 мкс, з 20 км через 133 мкс.</small></div>
+  <div class="prose"><p>Дві цілі розрізняються, якщо їхні відлуння не зливаються. Для простого імпульсу тривалістю τ роздільність cτ/2, а для сигналу зі смугою B (після стиснення, модуль 3) вона визначається смугою:</p></div>
+  <div class="formula">ΔR = c / (2B)<small>У AERIS-10 смуга chirp B = 20 МГц, отже ΔR = 7,5 м.</small></div>
+  <div class="prose"><p>Поки радар слухає один імпульс, наступний ще не надісланий. Якщо луна прийде вже після наступного імпульсу, її сплутають з ближньою ціллю. Звідси однозначна дальність через період повторення PRI:</p></div>
+  <div class="formula">R_однозн = c · PRI / 2<small>PRI = 167 мкс → 25 км. Довгий chirp сам по собі «засліплює» перші c·30 мкс/2 = 4,5 км, бо поки триває передавання, приймач вимкнено.</small></div>
+
+  <h3>Ефект Доплера</h3>
+  <div class="formula">f_d = 2v / λ<small>λ = c / 10,5 ГГц ≈ 2,857 см. Швидкість 1 м/с дає ≈ 70 Гц, дрон на 15 м/с ≈ 1,05 кГц.</small></div>
+  <div class="prose"><p>Доплерівський зсув на тлі 10,5 ГГц мізерний і за один chirp його не виміряти. Тому радар вимірює, як <b>фаза</b> луни повертається від імпульсу до імпульсу: Δφ = 2π·f_d·PRI. Саме це робить доплерівський FFT у модулі 6.</p></div>
+
+  <h3>Рівняння радіолокації</h3>
+  <div class="formula">SNR = Pₜ · G² · λ² · σ · τ · N / ((4π)³ · R⁴ · k·T₀ · F · L)<small>Pₜ потужність, G підсилення антени (TX і RX однакова решітка), σ ефективна площа розсіювання цілі (ЕПР), τ тривалість імпульсу, N кількість когерентно накопичених імпульсів, k·T₀ = 4·10⁻²¹ Вт/Гц, F коефіцієнт шуму, L втрати.</small></div>
+  <div class="prose">
+    <p>Дві речі з цієї формули визначають усю архітектуру. По-перше, <b>R⁴</b>: удвічі далі означає в 16 разів слабше. По-друге, у чисельнику стоїть <b>енергія</b> Pₜ·τ, а не пікова потужність. Довгий імпульс дає енергію, але погіршує роздільність. ЛЧМ дозволяє мати й те, й інше (модуль 3).</p>
+  </div>
+
+  <div class="lab" id="snrLab">
+    <div class="lab-title"><h4>Калькулятор енергетики</h4><span class="tag">SNR(R)</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="s_pt">Потужність Pₜ, Вт <output id="o_pt"></output></label><input type="range" id="s_pt" min="1" max="160" step="1" value="16"></div>
+      <div class="ctl"><label for="s_g">Підсилення G, дБі <output id="o_g"></output></label><input type="range" id="s_g" min="15" max="38" step="0.5" value="27"></div>
+      <div class="ctl"><label for="s_rcs">ЕПР σ, м² <output id="o_rcs"></output></label><select id="s_rcs"><option value="0.01">0,01 (малий дрон)</option><option value="0.1" selected>0,1 (дрон середній)</option><option value="1">1 (людина)</option><option value="10">10 (авто)</option></select></div>
+      <div class="ctl"><label for="s_tau">Тривалість τ, мкс <output id="o_tau"></output></label><input type="range" id="s_tau" min="0.5" max="30" step="0.5" value="30"></div>
+      <div class="ctl"><label for="s_n">Накопичення N <output id="o_n"></output></label><select id="s_n"><option value="1">1</option><option value="16" selected>16</option><option value="32">32</option></select></div>
+      <div class="ctl"><label for="s_fl">Шум + втрати F·L, дБ <output id="o_fl"></output></label><input type="range" id="s_fl" min="3" max="20" step="0.5" value="10"></div>
+    </div>
+    <canvas class="plot" id="snrPlot"></canvas>
+    <div class="readout">
+      <div><span>SNR на 3 км</span><b id="r_snr3"></b></div>
+      <div><span>Дальність при SNR = 13 дБ</span><b id="r_rmax"></b></div>
+      <div><span>Виграш стиснення B·τ</span><b id="r_bt"></b></div>
+    </div>
+    <p class="why" style="margin:0">Підсилення 27 дБі для решітки 8×16 і сумарні втрати 10 дБ тут оцінкові, у репозиторії їх немає. Порівняй 16 Вт і 160 Вт: це різниця між версіями 10N і 10E.</p>
+  </div>
+
+  <div class="quiz" data-mod="m2"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="1"><p>Яка роздільність по дальності у сигналу зі смугою 20 МГц?</p><div class="opts"><button class="opt">15 м</button><button class="opt">7,5 м</button><button class="opt">1,5 м</button><button class="opt">30 м</button></div><p class="why" hidden>c/(2B) = 3·10⁸ / 4·10⁷ = 7,5 м.</p></div>
+    <div class="q" data-a="2"><p>Ціль віддалилася з 1 км до 2 км. Як змінився SNR?</p><div class="opts"><button class="opt">Упав удвічі (−3 дБ)</button><button class="opt">Упав у 4 рази (−6 дБ)</button><button class="opt">Упав у 16 разів (−12 дБ)</button></div><p class="why" hidden>SNR ∝ 1/R⁴, 2⁴ = 16, тобто −12 дБ.</p></div>
+    <div class="q" data-a="0"><p>Чому довгий chirp 30 мкс не бачить ближні цілі?</p><div class="opts"><button class="opt">Поки він випромінюється, приймач вимкнено: сліпа зона 4,5 км</button><button class="opt">Через ефект Доплера</button><button class="opt">Бо ЦАП не встигає</button></div><p class="why" hidden>cτ/2 = 4,5 км. Тому в послідовності є короткий chirp 0,5 мкс зі сліпою зоною 75 м.</p></div>
+    <div class="q" data-a="1"><p>Який доплерівський зсув дає ціль зі швидкістю 10 м/с на 10,5 ГГц?</p><div class="opts"><button class="opt">≈ 70 Гц</button><button class="opt">≈ 700 Гц</button><button class="opt">≈ 7 кГц</button></div><p class="why" hidden>2·10 / 0,02857 ≈ 700 Гц.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M3 -->
+<section class="mod" id="m3" data-title="ЛЧМ і стиснення імпульсу">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 3 · хвильова форма</span>
+    <h2>ЛЧМ-chirp і узгоджений фільтр</h2>
+    <p class="lead">Як отримати енергію довгого імпульсу і роздільність короткого одночасно.</p>
+  </header>
+
+  <div class="prose">
+    <p>Замість простого радіоімпульсу радар випромінює сигнал, частота якого лінійно змінюється на смугу B за час T. У комплексній базовій смузі:</p>
+  </div>
+  <div class="formula">s(t) = exp(j·π·k·t²),  k = B / T,  0 ≤ t ≤ T<small>AERIS-10: B = 20 МГц, T = 30 мкс (довгий) або 0,5 мкс (короткий). Миттєва частота f(t) = k·t.</small></div>
+  <div class="prose">
+    <p><b>Узгоджений фільтр</b> максимізує SNR для відомої форми сигналу. Його імпульсна характеристика h(t) = s*(−t), тобто вихід є кореляцією прийнятого сигналу з еталонним chirp. Для ЛЧМ ця кореляція дає вузький пік шириною ≈ 1/B замість T, тобто імпульс «стискається» в B·T разів. Енергія не втрачається, вона збирається в пік.</p>
+    <p>Для довгого chirp B·T = 20·10⁶ · 30·10⁻⁶ = 600, тобто виграш ≈ 27,8 дБ і ширина піку ≈ 50 нс (7,5 м) замість 30 мкс (4,5 км).</p>
+  </div>
+
+  <div class="lab" id="chirpLab">
+    <div class="lab-title"><h4>Chirp і його стиснення</h4><span class="tag">100 МВ/с, як після DDC</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="c_b">Смуга B, МГц <output id="o_cb"></output></label><input type="range" id="c_b" min="1" max="40" step="1" value="20"></div>
+      <div class="ctl"><label for="c_t">Тривалість T, мкс <output id="o_ct"></output></label><input type="range" id="c_t" min="0.5" max="30" step="0.5" value="10"></div>
+      <div class="ctl"><label class="check" for="c_win"><input type="checkbox" id="c_win"> Вікно Хеммінга на еталоні</label><label class="check" for="c_rect"><input type="checkbox" id="c_rect" checked> Показати простий імпульс тієї ж тривалості</label></div>
+    </div>
+    <canvas class="plot" id="chirpPlot" style="height:170px"></canvas>
+    <canvas class="plot" id="mfPlot"></canvas>
+    <div class="legend"><span><i style="background:var(--trace)"></i>вихід узгодженого фільтра для ЛЧМ</span><span><i style="background:var(--hot)"></i>простий імпульс</span></div>
+    <div class="readout">
+      <div><span>Ширина піку −3 дБ</span><b id="r_mw"></b></div>
+      <div><span>Те саме в метрах</span><b id="r_mm"></b></div>
+      <div><span>Перший бічний пелюсток</span><b id="r_sl"></b></div>
+      <div><span>B·T</span><b id="r_cbt"></b></div>
+    </div>
+    <p class="why" style="margin:0">Помітно: ширина піку залежить лише від B, а T змінює тільки енергію. Вікно знижує бічні пелюстки з −13 дБ до ≈ −40 дБ ціною ширшого піку. Вісь X зрізана до ±1,5 мкс навколо піку.</p>
+  </div>
+
+  <h3>Довгий і короткий chirp</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Фаза</th><th>Тривалість</th><th>Навіщо</th></tr></thead>
+    <tbody>
+      <tr><td>Довгий chirp</td><td class="num">30 мкс</td><td>Енергія для далеких цілей, B·T = 600</td></tr>
+      <tr><td>Слухання</td><td class="num">137 мкс</td><td>Луна з 4,5 до ≈ 25 км</td></tr>
+      <tr><td>Гард</td><td class="num">175,4 мкс</td><td>Дати згаснути далеким відлунням</td></tr>
+      <tr><td>Короткий chirp</td><td class="num">0,5 мкс</td><td>Ближня зона від 75 м, B·T = 10</td></tr>
+      <tr><td>Слухання</td><td class="num">174,5 мкс</td><td>Ближні цілі</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Як це зроблено у FPGA</h3>
+  <div class="prose">
+    <p><b>Передавання.</b> Модуль <code>plfm_chirp_controller.v</code> є автоматом станів IDLE → LONG_CHIRP → LONG_LISTEN → GUARD_TIME → SHORT_CHIRP → SHORT_LISTEN. Готовий chirp лежить у блоковій пам'яті (3600 відліків для 30 мкс на 120 МГц) і виводиться на 8-бітний ЦАП. Той самий автомат вмикає змішувачі TX і RX по черзі та смикає лінії TR/LOAD для ADAR1000.</p>
+    <p><b>Приймання.</b> Кореляцію рахують у частотній області, бо згортка 3000 відліків «в лоб» надто дорога:</p>
+  </div>
+  <div class="formula">y = IFFT( FFT(x) · conj(FFT(ref)) )<small>1024-точкові FFT. Довгий chirp (3000 відліків на 100 МВ/с) не влазить у 1024, тому він порізаний на 4 сегменти з перекриттям 128 (overlap-save), еталон кожного сегмента лежить в окремому .mem файлі.</small></div>
+  <div class="prose">
+    <p>Еталон з пам'яті треба подати на множник рівно тоді, коли туди дійде FFT сигналу. Для цього між пам'яттю і фільтром стоїть <code>latency_buffer</code> на 3187 тактів. Якщо ця затримка не збігається, стиснення розвалюється. Це один з найкрихкіших місць ланцюга.</p>
+  </div>
+  <div class="callout"><strong>Зв'язок дальності з Доплером</strong>У ЛЧМ доплерівський зсув трохи зсуває пік по дальності на f_d/k. Для 40 м/с: f_d ≈ 2,8 кГц, k = 20 МГц/30 мкс, зсув ≈ 4 нс ≈ 0,6 м. Менше одного біна, тож тут його можна не враховувати.</div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/plfm_chirp_controller.v">plfm_chirp_controller.v</a><span>Автомат chirp, таблиці для ЦАП, керування змішувачами й ADAR1000.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/tb/cosim/gen_chirp_mem.py">tb/cosim/gen_chirp_mem.py</a><span>Генерує еталонні chirp <code>long_chirp_seg*.mem</code>. Найпростіше місце побачити формулу фази.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/chirp_memory_loader_param.v">chirp_memory_loader_param.v</a><span>Видає еталон потрібного сегмента під час обробки.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/matched_filter_multi_segment.v">matched_filter_multi_segment.v</a><span>Overlap-save: буферизація, 4 сегменти, вибір довгий/короткий.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/matched_filter_processing_chain.v">matched_filter_processing_chain.v</a><span>FFT → комплексно-спряжене множення → IFFT.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/fft_engine.v">fft_engine.v</a><span>Сам FFT на 1024 точки, твідл-фактори в <code>fft_twiddle_1024.mem</code>.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/latency_buffer.v">latency_buffer.v</a><span>Вирівнювання еталона з потоком даних.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m3"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="1"><p>Від чого залежить ширина піку після узгодженого фільтра?</p><div class="opts"><button class="opt">Від тривалості chirp T</button><button class="opt">Від смуги B</button><button class="opt">Від потужності</button></div><p class="why" hidden>Ширина ≈ 1/B. Тривалість впливає на енергію і виграш B·T.</p></div>
+    <div class="q" data-a="2"><p>Навіщо фільтр рахується через FFT, а не згорткою?</p><div class="opts"><button class="opt">Так точніше</button><button class="opt">Згортка не працює з комплексними числами</button><button class="opt">Згортка з 3000 коефіцієнтами потребувала б тисяч множень на відлік, а FFT зводить це до N·log N</button></div><p class="why" hidden>Пряма згортка: ~3000 множень на кожен вихідний відлік. Через FFT множення в частотній області поелементне.</p></div>
+    <div class="q" data-a="0"><p>Що станеться, якщо затримка <code>latency_buffer</code> не збігається з латентністю FFT?</p><div class="opts"><button class="opt">Сигнал множитиметься не на свій еталон, і пік стиснення зникне або розмажеться</button><button class="opt">Нічого, FFT це компенсує</button><button class="opt">Зміниться лише амплітуда</button></div><p class="why" hidden>Узгоджений фільтр працює лише тоді, коли еталон відповідає саме цьому сегменту даних.</p></div>
+    <div class="q" data-a="1"><p>Навіщо вікно Хеммінга на еталоні?</p><div class="opts"><button class="opt">Щоб звузити пік</button><button class="opt">Щоб знизити бічні пелюстки і слабка ціль поруч із сильною не ховалась</button><button class="opt">Щоб підняти SNR</button></div><p class="why" hidden>Вікно трохи розширює пік і втрачає ~1,3 дБ SNR, зате бічні пелюстки падають з −13 до ≈ −40 дБ.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M4 -->
+<section class="mod" id="m4" data-title="Фазована решітка">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 4 · антена</span>
+    <h2>Фазована антенна решітка і формування променя</h2>
+    <p class="lead">Як 16 фазообертачів повертають промінь без жодної рухомої частини.</p>
+  </header>
+  <div class="prose">
+    <p>Візьмемо лінійку з N елементів з кроком d. Хвиля, що приходить під кутом θ, досягає сусіднього елемента з різницею ходу d·sinθ. Якщо в кожному каналі додати фазу, яка цю різницю компенсує, сигнали складуться синфазно саме для напрямку θ₀:</p>
+  </div>
+  <div class="formula">φₙ = n · 2π · d · sin θ₀ / λ<small>При d = λ/2 це φₙ = n·π·sin θ₀. Для 20° сусідні елементи відрізняються на 61,6°.</small></div>
+  <div class="formula">AF(θ) = Σₙ wₙ · exp( j·n·2π·d·(sin θ − sin θ₀) / λ )<small>Множник решітки. wₙ амплітудна вага (taper), яка знижує бічні пелюстки.</small></div>
+  <div class="prose">
+    <ul>
+      <li><b>Ширина променя</b> ≈ 0,886·λ/(N·d·cos θ₀) рад. Для 16 елементів з λ/2 це ≈ 6,3° в нормалі і ширше при відхиленні.</li>
+      <li><b>Дифракційні (грейтинг) пелюстки</b> з'являються, коли d > λ/2 і промінь сильно відхилено: з'являється другий напрямок, де фази теж збігаються.</li>
+      <li><b>Квантування фази.</b> ADAR1000 задає фазу 7 бітами: 128 станів по 2,8125°. Похибка квантування піднімає бічні пелюстки.</li>
+    </ul>
+  </div>
+
+  <div class="lab" id="afLab">
+    <div class="lab-title"><h4>Діаграма спрямованості</h4><span class="tag">множник решітки</span></div>
+    <div class="controls">
+      <div class="ctl"><label for="a_th">Кут променя θ₀ <output id="o_ath"></output></label><input type="range" id="a_th" min="-60" max="60" step="1" value="20"></div>
+      <div class="ctl"><label for="a_n">Елементів N <output id="o_an"></output></label><input type="range" id="a_n" min="2" max="32" step="1" value="16"></div>
+      <div class="ctl"><label for="a_d">Крок d / λ <output id="o_ad"></output></label><input type="range" id="a_d" min="0.3" max="1.0" step="0.05" value="0.5"></div>
+      <div class="ctl"><label class="check" for="a_q"><input type="checkbox" id="a_q" checked> Квантування 7 біт (ADAR1000)</label><label class="check" for="a_tap"><input type="checkbox" id="a_tap"> Вагове вікно Хеммінга</label></div>
+    </div>
+    <canvas class="plot" id="afPlot"></canvas>
+    <div class="readout">
+      <div><span>Ширина −3 дБ</span><b id="r_bw"></b></div>
+      <div><span>Найвищий бічний пелюсток</span><b id="r_psl"></b></div>
+      <div><span>Коди фази ADAR1000, канали 0–3</span><b id="r_codes"></b></div>
+    </div>
+  </div>
+
+  <h3>Як це зроблено в залізі й коді</h3>
+  <div class="prose">
+    <p>Чотири мікросхеми ADAR1000 мають по 4 канали, разом 16. Кожна фаза задається не числом градусів, а парою значень I/Q векторного модулятора: таблиці <code>VM_I</code> і <code>VM_Q</code> на 128 станів. STM32 рахує фази так:</p>
+  </div>
+<pre><code>// ADAR1000_Manager.cpp
+void ADAR1000Manager::calculatePhaseSettings(float angle_degrees, uint8_t phase_settings[4]) {
+    const float wavelength = c / freq;            // 10.5 ГГц
+    const float element_spacing = wavelength / 2;
+    float phase_shift = (2 * M_PI * element_spacing * sin(angle_rad)) / wavelength;
+    for (int i = 0; i &lt; 4; ++i) {
+        float element_phase = i * phase_shift;     // + обгортання в [0, 2π)
+        phase_settings[i] = (element_phase / (2 * M_PI)) * 128;   // 7-бітний код
+    }
+}</code></pre>
+  <div class="prose">
+    <p>Зверни увагу: функція рахує 4 фази для однієї мікросхеми, тобто прогресію всередині одного ADAR1000. Для повного променя по 16 каналах є <code>setCustomBeamPattern16</code>, куди подається вже готовий масив фаз. Код обрізає, а не округлює, тому похибка квантування до 2,8°. Обидва моменти варто перевірити, коли розбиратимешся з калібруванням.</p>
+    <p>STM32 пише регістри по SPI через перетворювачі рівнів 3,3 → 1,8 В, які розведено через FPGA. Миттєве перемикання TX/RX між chirp робить FPGA лініями <code>adar_tr_*</code> і <code>adar_*_load_*</code>, бо SPI для цього занадто повільний.</p>
+    <p>На решітці 8×16 лише 16 керованих каналів, тож кожен канал живить групу патчів. Електронне сканування відбувається в одній площині (31 позиція кута місця), друга координата механічна.</p>
+  </div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_1_Microcontroller/9_1_1_C_Cpp_Libraries/ADAR1000_Manager.cpp">ADAR1000_Manager.cpp</a><span>Ініціалізація, таблиці VM_I/VM_Q, <code>calculatePhaseSettings</code>, режими TX/RX.</span></li>
+    <li><a data-src="9_Firmware/9_1_Microcontroller/9_1_1_C_Cpp_Libraries/ADAR1000_AGC.cpp">ADAR1000_AGC.cpp</a><span>Зовнішній контур АРП через підсилення каналів ADAR1000.</span></li>
+    <li><a data-src="9_Firmware/tests/cross_layer/adar1000_vm_reference.py">tests/cross_layer/adar1000_vm_reference.py</a><span>Еталон таблиць векторного модулятора для тестів.</span></li>
+    <li><a data-src="5_Simulations/array_pattern_Kaiser25dB_like.py">5_Simulations/array_pattern_Kaiser25dB_like.py</a><span>Моделювання діаграми решітки з вагами Кайзера.</span></li>
+    <li><a data-src="docs/AERIS_Antenna_Report.pdf">docs/AERIS_Antenna_Report.pdf</a><span>Звіт по антені.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m4"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="1"><p>Яка різниця фаз між сусідніми елементами для θ₀ = 30° при d = λ/2?</p><div class="opts"><button class="opt">30°</button><button class="opt">90°</button><button class="opt">180°</button></div><p class="why" hidden>π·sin 30° = π/2 = 90°.</p></div>
+    <div class="q" data-a="2"><p>Що з'явиться, якщо зробити d = λ і відхилити промінь на 40°?</p><div class="opts"><button class="opt">Вужчий промінь без побічних ефектів</button><button class="opt">Нічого не зміниться</button><button class="opt">Дифракційний пелюсток такої ж висоти, як головний</button></div><p class="why" hidden>Спробуй у симуляторі: при d > λ/2 з'являється другий напрямок, де всі фази збігаються.</p></div>
+    <div class="q" data-a="0"><p>Скільки станів фази має канал ADAR1000?</p><div class="opts"><button class="opt">128 (крок 2,8125°)</button><button class="opt">64</button><button class="opt">360</button></div><p class="why" hidden>7 біт, 360°/128 = 2,8125°.</p></div>
+    <div class="q" data-a="1"><p>Чому перемикання TX/RX керує FPGA, а не STM32 по SPI?</p><div class="opts"><button class="opt">STM32 не має SPI</button><button class="opt">Перемикання треба робити з точністю до тактів у моменти chirp, а SPI-запис регістрів займає мікросекунди</button><button class="opt">Так дешевше</button></div><p class="why" hidden>Короткий chirp триває 0,5 мкс, тож затримки SPI неприйнятні.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M5 -->
+<section class="mod" id="m5" data-title="Приймальний тракт">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 5 · від антени до I/Q</span>
+    <h2>Супергетеродин, АЦП і цифрове перенесення частоти</h2>
+    <p class="lead">Як 10,5 ГГц перетворюються на потік комплексних відліків 100 МВ/с.</p>
+  </header>
+  <div class="prose">
+    <p>Синтезатори ADF4382 дають два гетеродини: TX 10,5 ГГц і RX 10,38 ГГц (<code>adf4382a_manager.h</code>). Їхня різниця 120 МГц і є проміжною частотою (ПЧ), на якій луна потрапляє на АЦП. Аналоговим змішувачем переноситься лише на ПЧ, а остаточне перенесення в нуль робиться цифрово.</p>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 900 140" role="img" aria-label="Цифровий приймальний ланцюг">
+      <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="arrowhead"></path></marker></defs>
+      <rect class="blk" x="10" y="40" width="120" height="56" rx="7"></rect><text x="22" y="62">АЦП AD9484</text><text x="22" y="80" class="sub">8 біт @ 400 МВ/с</text>
+      <rect class="blk fpga" x="160" y="40" width="140" height="56" rx="7"></rect><text x="172" y="62">× NCO 120 МГц</text><text x="172" y="80" class="sub">cos/sin → I і Q</text>
+      <rect class="blk fpga" x="330" y="40" width="140" height="56" rx="7"></rect><text x="342" y="62">CIC, 5 каскадів</text><text x="342" y="80" class="sub">÷4 → 100 МВ/с</text>
+      <rect class="blk fpga" x="500" y="40" width="130" height="56" rx="7"></rect><text x="512" y="62">FIR, 32 відводи</text><text x="512" y="80" class="sub">НЧ-фільтр @ 100 МГц</text>
+      <rect class="blk fpga" x="660" y="40" width="110" height="56" rx="7"></rect><text x="672" y="62">Підсилення</text><text x="672" y="80" class="sub">±2ⁿ, AGC</text>
+      <text x="790" y="72">→ узгоджений</text><text x="790" y="88">фільтр</text>
+      <path class="wire" d="M130,68 H158" marker-end="url(#ah2)"></path>
+      <path class="wire" d="M300,68 H328" marker-end="url(#ah2)"></path>
+      <path class="wire" d="M470,68 H498" marker-end="url(#ah2)"></path>
+      <path class="wire" d="M630,68 H658" marker-end="url(#ah2)"></path>
+      <text x="10" y="122" class="sub">домен 400 МГц (тактується від DCO АЦП)</text>
+      <text x="500" y="122" class="sub">домен 100 МГц (системний)</text>
+      <text x="10" y="24" class="sub">ПЧ 120 МГц, дійсний сигнал</text>
+      <text x="500" y="24" class="sub">комплексна базова смуга, 18 → 16 біт</text>
+    </svg>
+  </div>
+
+  <h3>NCO і змішування</h3>
+  <div class="prose"><p>Числово-керований генератор (NCO) щотакту додає до 32-бітного фазового акумулятора слово налаштування FTW. Старші біти фази адресують таблицю синусів. Частота виходу:</p></div>
+  <div class="formula">f_out = FTW · f_s / 2³²<small>FTW = 0x4CCCCCCD = 1 288 490 189 → 120 МГц при f_s = 400 МГц. До FTW додається псевдовипадковий дизер, щоб розмити паразитні спури від обрізання фази.</small></div>
+  <div class="prose">
+    <p>Множення на cos дає I, на −sin дає Q. Навіщо два канали? Дійсний сигнал має симетричний спектр, і ціль, що наближається, не відрізнити від тієї, що віддаляється. Комплексний I/Q зберігає знак частоти, а отже і знак Доплера.</p>
+  </div>
+
+  <h3>CIC і FIR</h3>
+  <div class="formula">H_CIC(z) = [ (1 − z⁻ᴿ) / (1 − z⁻¹) ]ᴺ,  R = 4, N = 5<small>CIC складається лише з суматорів і віднімачів, тому витримує 400 МГц. Коефіцієнт підсилення Rᴺ = 1024, звідси 10 додаткових біт розрядності.</small></div>
+  <div class="prose">
+    <p>CIC дешево знижує частоту в 4 рази, але має «завал» АЧХ у смузі пропускання і слабко давить сусідні смуги. Тому після нього стоїть звичайний FIR на 32 відводи, який вже працює на 100 МГц і остаточно формує смугу. Класична пара: грубий дешевий фільтр на високій частоті, точний на низькій.</p>
+    <p>Перехід між доменами 400 МГц і 100 МГц теж робиться всередині DDC. Синхронізатори між доменами (<code>cdc_modules.v</code>) перевірено формально в папці <code>formal/</code>.</p>
+  </div>
+
+  <h3>Регулювання підсилення</h3>
+  <div class="prose">
+    <p>У 8-бітного АЦП динамічний діапазон невеликий (≈ 48 дБ), тому між DDC і узгодженим фільтром стоїть <code>rx_gain_control.v</code>: зсув на 0–7 біт вліво або вправо. З увімкненим AGC модуль раз на кадр дивиться на пік і кількість насичених відліків і змінює зсув (параметри target, attack, decay, holdoff з опкодів 0x28–0x2C). Це внутрішній контур. Зовнішній контур на STM32 змінює підсилення каналів ADAR1000, а GUI має симулятор обох (<code>v7/agc_sim.py</code>).</p>
+  </div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/ad9484_interface_400m.v">ad9484_interface_400m.v</a><span>Прийом LVDS з АЦП, буферизація тактового сигналу 400 МГц.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/ddc_400m.v">ddc_400m.v</a><span>Увесь DDC: NCO, змішувачі, CIC, FIR, дизер, діагностика.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/nco_400m_enhanced.v">nco_400m_enhanced.v</a><span>Фазовий акумулятор на DSP48E1 і таблиця синусів.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/cic_decimator_4x_enhanced.v">cic_decimator_4x_enhanced.v</a><span>5-каскадний CIC на каскаді DSP48E1.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/fir_lowpass.v">fir_lowpass.v</a><span>Конвеєрний FIR на 32 симетричні коефіцієнти.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/rx_gain_control.v">rx_gain_control.v</a><span>Цифрове підсилення і AGC.</span></li>
+    <li><a data-src="9_Firmware/9_1_Microcontroller/9_1_1_C_Cpp_Libraries/adf4382a_manager.h">adf4382a_manager.h</a><span>Частоти гетеродинів TX/RX.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m5"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="1"><p>Яке FTW потрібне для 100 МГц при f_s = 400 МГц і 32-бітному акумуляторі?</p><div class="opts"><button class="opt">0x19999999</button><button class="opt">0x40000000</button><button class="opt">0x80000000</button></div><p class="why" hidden>100/400 · 2³² = 2³⁰ = 0x40000000.</p></div>
+    <div class="q" data-a="0"><p>Навіщо приймачу комплексний сигнал I/Q?</p><div class="opts"><button class="opt">Щоб відрізняти додатні й від'ємні частоти, тобто напрямок руху цілі</button><button class="opt">Щоб подвоїти потужність</button><button class="opt">Цього вимагає USB</button></div><p class="why" hidden>Без Q спектр симетричний і знак Доплера губиться.</p></div>
+    <div class="q" data-a="2"><p>Чому CIC стоїть першим, а FIR після нього?</p><div class="opts"><button class="opt">FIR не вміє децимувати</button><button class="opt">Так історично склалось</button><button class="opt">CIC не має множників і працює на 400 МГц, а FIR з 32 множеннями дешевше рахувати на вчетверо нижчій частоті</button></div><p class="why" hidden>Дорогі операції переносяться туди, де відліків менше.</p></div>
+    <div class="q" data-a="1"><p>Яка ПЧ на вході АЦП і звідки вона береться?</p><div class="opts"><button class="opt">10,5 ГГц, напряму</button><button class="opt">120 МГц, різниця гетеродинів 10,5 і 10,38 ГГц</button><button class="opt">20 МГц, смуга chirp</button></div><p class="why" hidden>RX-гетеродин зсунутий на 120 МГц відносно TX.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M6 -->
+<section class="mod" id="m6" data-title="Дальність × Доплер">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 6 · двовимірна обробка</span>
+    <h2>Карта дальність-Доплер</h2>
+    <p class="lead">Швидкий час дає дальність, повільний час дає швидкість. Разом виходить матриця 64 × 32, по якій шукають цілі.</p>
+  </header>
+  <div class="prose">
+    <p>Уяви таблицю: кожен рядок є одним chirp після стиснення (профіль дальності), рядки йдуть один за одним. Уздовж рядка (<b>швидкий час</b>, наносекунди) читаємо дальність. Уздовж стовпця (<b>повільний час</b>, сотні мікросекунд між chirp) бачимо, як повертається фаза луни з однієї дальності. FFT по стовпцю перетворює це обертання на частоту Доплера.</p>
+  </div>
+
+  <h3>Крок 1. Децимація по дальності</h3>
+  <div class="prose">
+    <p>Узгоджений фільтр видає 1024 відліки на сегмент, по 1,5 м кожен (c/(2·100 МГц)). Для доплерівської пам'яті це забагато, тому <code>range_bin_decimator.v</code> групує їх по 16 і з кожної групи бере найбільший за |I|+|Q| (режим peak). Виходить 64 біни по 24 м. Режими 00 (просто кожен 16-й) і 10 (середнє) теж є.</p>
+  </div>
+  <div class="callout warn"><strong>Питання для дослідження</strong>64 біни × 24 м = 1,5 км. Це менше, ніж 3 або 20 км з паспорта. Варто з'ясувати, як вікно дальності вибирається параметром <code>start_bin</code> і режимом <code>host_range_mode</code> (опкод 0x20), і як це узгоджується з чотирма сегментами довгого chirp.</div>
+
+  <h3>Крок 2. Доплерівський FFT і рознесений PRF</h3>
+  <div class="prose">
+    <p>32 chirp кадру не є рівномірною послідовністю: 16 мають період 167 мкс, 16 інших 175 мкс. Один 32-точковий FFT по нерівномірних відліках давав би неправильний результат, тому <code>doppler_processor.v</code> рахує два окремих 16-точкових FFT з вікном Хеммінга. Номер біна на виході має 5 біт: <code>{sub_frame, bin[3:0]}</code>.</p>
+  </div>
+  <div class="formula">Δv = λ / (2·N·PRI),  v_однозн = ±λ / (4·PRI)<small>Підкадр 0 (PRI 167 мкс): Δv ≈ 5,35 м/с, однозначно до ±42,8 м/с. Підкадр 1 (PRI 175 мкс): Δv ≈ 5,10 м/с, до ±40,8 м/с.</small></div>
+  <div class="prose">
+    <p>Ціль на 60 м/с перевищує однозначну швидкість і «загортається» в інший бін, причому в двох підкадрах по-різному, бо періоди різні. Порівнявши обидва результати, можна відновити справжню швидкість (як у китайській теоремі про залишки). Модуль у FPGA лише готує дані для цього. Саме розкриття неоднозначності треба шукати вище, в GUI.</p>
+  </div>
+  <div class="btnrow"><button class="btn primary" data-lab="m6">Відкрити лабораторію з цим налаштуванням</button></div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/range_bin_decimator.v">range_bin_decimator.v</a><span>1024 → 64 біни, режими decimate/peak/average, сторожовий таймер.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/doppler_processor.v">doppler_processor.v</a><span>Два 16-точкові FFT, вікно Хеммінга в Q15, пам'ять кадру.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/xfft_16.v">xfft_16.v</a><span>16-точковий FFT, твідли в <code>fft_twiddle_16.mem</code>.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/radar_mode_controller.v">radar_mode_controller.v</a><span>Режими: від STM32, автоскан, одиночний chirp для налагодження.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/tb/cosim/gen_doppler_golden.py">tb/cosim/gen_doppler_golden.py</a><span>Еталон доплерівської обробки на Python для порівняння з RTL.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m6"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="0"><p>Що таке «повільний час»?</p><div class="opts"><button class="opt">Вісь від chirp до chirp, по ній вимірюється Доплер</button><button class="opt">Час усередині одного chirp</button><button class="opt">Час оберту двигуна</button></div><p class="why" hidden>Швидкий час всередині chirp дає дальність, повільний між chirp дає швидкість.</p></div>
+    <div class="q" data-a="2"><p>Чому доплерівська обробка розбита на два 16-точкові FFT?</p><div class="opts"><button class="opt">Не вистачає пам'яті на 32</button><button class="opt">Так швидше</button><button class="opt">Дві половини кадру мають різний PRI, а FFT вимагає рівномірних відліків</button></div><p class="why" hidden>Рознесений PRF також дає змогу розкрити неоднозначність швидкості.</p></div>
+    <div class="q" data-a="1"><p>Яка роздільність по швидкості для 16 chirp з PRI 167 мкс?</p><div class="opts"><button class="opt">≈ 0,5 м/с</button><button class="opt">≈ 5,3 м/с</button><button class="opt">≈ 42 м/с</button></div><p class="why" hidden>0,02857 / (2·16·167·10⁻⁶) ≈ 5,35 м/с.</p></div>
+    <div class="q" data-a="0"><p>Що робить децимація в режимі peak?</p><div class="opts"><button class="opt">З кожних 16 бінів дальності лишає той, де |I|+|Q| найбільший</button><button class="opt">Усереднює 16 chirp</button><button class="opt">Відкидає кожен другий chirp</button></div><p class="why" hidden>Так ціль не губиться між бінами, хоч точність по дальності падає до 24 м.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M7 -->
+<section class="mod" id="m7" data-title="MTI і завади">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 7 · придушення відбиттів від землі</span>
+    <h2>MTI і DC notch</h2>
+    <p class="lead">Будівлі, дерева й рельєф відбивають у тисячі разів сильніше за дрон. Але вони не рухаються, і саме це їх видає.</p>
+  </header>
+  <div class="prose">
+    <p>Нерухоме відбиття (кліпер, англ. clutter) дає однакову фазу в кожному chirp, тобто нульову доплерівську частоту. Найпростіший спосіб його прибрати: відняти попередній chirp від поточного в кожному біні дальності.</p>
+  </div>
+  <div class="formula">y[n] = x[n] − x[n−1],  H(z) = 1 − z⁻¹,  |H(f_d)| = 2·|sin(π·f_d·PRI)|<small>Нуль на f_d = 0 (і на кратних PRF, це «сліпі швидкості»). Цілі з f_d = PRF/2 підсилюються вдвічі.</small></div>
+  <div class="prose">
+    <ul>
+      <li><code>mti_canceller.v</code> стоїть між децимацією і доплерівським FFT. Зберігає 64 біни попереднього chirp у невеликій пам'яті.</li>
+      <li>Перший chirp після скидання не має попередника, тому виходить нулем.</li>
+      <li>Повільні цілі (≈ 1 біна Доплера) теж послаблюються. Це плата за простоту двоімпульсного фільтра. У GUI (<code>v7/processing.py</code>) є MTI 2-го і 3-го порядку для порівняння.</li>
+    </ul>
+    <p><b>DC notch</b> діє вже після FFT: обнуляє біни в межах ±width від нуля в обох підкадрах (опкод 0x27). Наприклад, width = 2 обнуляє {0, 1, 15, 16, 17, 31}. Це грубіше, ніж MTI, але прибирає залишки, які MTI пропустив через коливання дерев чи нестабільність фази.</p>
+  </div>
+  <div class="btnrow"><button class="btn primary" data-lab="m7">Порівняти в лабораторії: MTI вимк. і ввімк.</button></div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/mti_canceller.v">mti_canceller.v</a><span>Двоімпульсний режекторний фільтр, пам'ять попереднього chirp.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/radar_system_top.v">radar_system_top.v</a><span>DC notch (шукай «DC NOTCH FILTER») і регістри <code>host_mti_enable</code>, <code>host_dc_notch_width</code>.</span></li>
+    <li><a data-src="9_Firmware/9_3_GUI/v7/processing.py">v7/processing.py</a><span><code>mti_filter</code> порядків 1–3 і <code>dc_notch</code> у програмній обробці.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m7"><h4>Самоперевірка <small>3 питання</small></h4>
+    <div class="q" data-a="1"><p>Яку частоту Доплера повністю придушує H(z) = 1 − z⁻¹?</p><div class="opts"><button class="opt">PRF/2</button><button class="opt">0 і кратні PRF</button><button class="opt">Жодну</button></div><p class="why" hidden>|H| = 2|sin(π f_d PRI)| дорівнює нулю при f_d = k·PRF.</p></div>
+    <div class="q" data-a="0"><p>Чому повільний пішохід може зникнути після MTI?</p><div class="opts"><button class="opt">Його Доплер близький до нуля, де фільтр має глибокий провал</button><button class="opt">MTI працює лише для дронів</button><button class="opt">Через децимацію</button></div><p class="why" hidden>Двоімпульсний фільтр має широкий провал біля нуля.</p></div>
+    <div class="q" data-a="2"><p>Які біни обнулить DC notch з width = 1?</p><div class="opts"><button class="opt">Лише 0</button><button class="opt">0, 1, 31</button><button class="opt">0 і 16</button></div><p class="why" hidden>Нульовий бін кожного підкадру: 0 і 16.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M8 -->
+<section class="mod" id="m8" data-title="CFAR-детекція">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 8 · рішення «є ціль»</span>
+    <h2>CFAR: поріг, що підлаштовується під шум</h2>
+    <p class="lead">Фінальний крок: з 2048 клітинок карти вибрати ті, де справді ціль.</p>
+  </header>
+  <div class="prose">
+    <p>Фіксований поріг погано працює: біля кліпера чи завади рівень фону вищий, і там посиплються хибні тривоги, а в тихих місцях пропадуть слабкі цілі. CFAR (Constant False Alarm Rate) оцінює шум навколо кожної клітинки і ставить поріг пропорційно до нього, тому ймовірність хибної тривоги P_fa лишається сталою.</p>
+  </div>
+  <div class="diagram">
+    <svg viewBox="0 0 860 120" role="img" aria-label="Вікно CA-CFAR: навчальні, захисні клітинки і клітинка під тестом">
+      <g id="cfarCells"></g>
+      <text x="80" y="104" class="sub">навчальні, T</text>
+      <text x="330" y="104" class="sub">захисні, G</text>
+      <text x="405" y="18">CUT</text>
+      <text x="470" y="104" class="sub">захисні, G</text>
+      <text x="640" y="104" class="sub">навчальні, T</text>
+    </svg>
+  </div>
+  <div class="formula">поріг = α · Z,   ціль, якщо x_CUT > поріг<small>CA: Z = середнє 2T навчальних клітинок. GO: більше з двох середніх (стійкіше на межі кліпера). SO: менше з двох (краще для двох близьких цілей). Захисні клітинки не дають самій цілі «підняти» оцінку шуму.</small></div>
+  <div class="formula">α = M · (P_fa^(−1/M) − 1)<small>Для CA-CFAR з квадратичним детектором і M = 2T навчальних клітинок. M = 16, P_fa = 10⁻⁴ → α ≈ 12,4 (10,9 дБ).</small></div>
+
+  <h3>Як це зроблено в <code>cfar_ca.v</code></h3>
+  <div class="prose">
+    <ul>
+      <li>Під час кадру рахує модуль як |I| + |Q| (без квадратів і кореня) і пише в BRAM 64 × 32.</li>
+      <li>Після <code>frame_complete</code> проходить кожен доплерівський стовпець уздовж дальності ковзним вікном: 3 такти на клітинку, ≈ 85 мкс на весь кадр.</li>
+      <li>Поріг = (α · сума) ≫ 4. Тобто α у форматі Q4.4 множиться на <b>суму</b>, а не на середнє. Хост має сам поділити статистичне α на кількість клітинок.</li>
+      <li>На краях дальності береться лише та частина вікна, що влізла.</li>
+      <li>Налаштування: guard (0x21), train (0x22), alpha (0x23), mode (0x24), enable (0x25). Без CFAR працює простий поріг (0x03).</li>
+    </ul>
+  </div>
+  <div class="callout warn"><strong>Що перевірити</strong>Типові значення в <code>radar_system_top.v</code>: guard 2, train 8, alpha 0x30 = 3,0, CFAR вимкнено. Оскільки α множиться на суму 16 клітинок, 3,0 відповідає порогу в 48 разів вище середнього шуму. Це дуже консервативно. Перш ніж вмикати CFAR на залізі, варто пересвідчитись, які значення шле GUI. Крім того, формула для α вище виведена для квадратичного детектора, а |I|+|Q| ближче до амплітудного, тож α доведеться калібрувати на реальних даних.</div>
+  <div class="btnrow"><button class="btn primary" data-lab="m8">Підібрати CFAR у лабораторії</button></div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/cfar_ca.v">cfar_ca.v</a><span>CA/GO/SO-CFAR з ковзним вікном, BRAM, один DSP на множення.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/tb/tb_cfar_ca.v">tb/tb_cfar_ca.v</a><span>Тестбенч: зручно подивитись, які сценарії перевіряються.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/tb/cosim/real_data/golden_reference.py">tb/cosim/real_data/golden_reference.py</a><span><code>run_cfar_ca</code>: побітова Python-модель того самого CFAR.</span></li>
+    <li><a data-src="9_Firmware/9_3_GUI/v7/processing.py">v7/processing.py</a><span><code>cfar_1d</code>, <code>cfar_2d</code>, а далі кластеризація, асоціація і трекінг.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m8"><h4>Самоперевірка <small>4 питання</small></h4>
+    <div class="q" data-a="1"><p>Навіщо захисні клітинки?</p><div class="opts"><button class="opt">Щоб швидше рахувати</button><button class="opt">Щоб енергія самої цілі, що розтеклась на сусідні біни, не підняла оцінку шуму</button><button class="opt">Щоб захистити BRAM</button></div><p class="why" hidden>Інакше ціль «маскує» сама себе.</p></div>
+    <div class="q" data-a="2"><p>Який режим краще на межі області кліпера?</p><div class="opts"><button class="opt">SO</button><button class="opt">CA</button><button class="opt">GO</button></div><p class="why" hidden>GO бере більшу з двох оцінок і не дає хибних тривог на переході від тихої зони до кліпера.</p></div>
+    <div class="q" data-a="0"><p>У FPGA α = 0x30 (3,0), train = 8 з кожного боку. У скільки разів поріг вищий за середній шум?</p><div class="opts"><button class="opt">У 48</button><button class="opt">У 3</button><button class="opt">У 24</button></div><p class="why" hidden>α множиться на суму 16 клітинок: 3·16 = 48.</p></div>
+    <div class="q" data-a="1"><p>Що робить CFAR, коли загальний рівень шуму піднявся на 6 дБ?</p><div class="opts"><button class="opt">Кількість хибних тривог зростає в 4 рази</button><button class="opt">Поріг піднімається разом із шумом, і P_fa лишається тією самою</button><button class="opt">Вимикається</button></div><p class="why" hidden>У цьому й сенс CFAR: поріг пропорційний оцінці шуму.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ M9 -->
+<section class="mod" id="m9" data-title="Від детекції до екрана">
+  <header class="mod-head">
+    <span class="eyebrow">Модуль 9 · USB, GUI і перевірка</span>
+    <h2>Від детекції до екрана</h2>
+    <p class="lead">Як результати виходять з FPGA, що з ними робить Python і як перевіряється весь ланцюг без заліза.</p>
+  </header>
+
+  <h3>Протокол USB</h3>
+  <div class="prose"><p>Плата XC7A50T використовує FT2232H (USB 2.0, 8 біт), плата XC7A200T використовує FT601 (USB 3.0, 32 біти). Вибір через параметр <code>USB_MODE</code>.</p></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Пакет</th><th>Формат</th></tr></thead>
+    <tbody>
+      <tr><td>Дані, FPGA → ПК, 11 байт</td><td class="num">AA · range_q(2) · range_i(2) · dop_re(2) · dop_im(2) · det(1) · 55</td></tr>
+      <tr><td>Статус, 26 байт</td><td class="num">BB · 6 × 32 біт · 55</td></tr>
+      <tr><td>Команда, ПК → FPGA, 4 байти</td><td class="num">opcode · addr · value_hi · value_lo</td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Опкод</th><th>Що задає</th><th>Опкод</th><th>Що задає</th></tr></thead>
+    <tbody>
+      <tr><td class="num">0x01</td><td>Режим: STM32 / автоскан / одиночний</td><td class="num">0x21–0x25</td><td>CFAR: guard, train, α, режим, увімк.</td></tr>
+      <tr><td class="num">0x03</td><td>Простий поріг детекції</td><td class="num">0x26, 0x27</td><td>MTI, ширина DC notch</td></tr>
+      <tr><td class="num">0x10–0x15</td><td>Таймінги chirp, chirp на позицію</td><td class="num">0x28–0x2C</td><td>AGC</td></tr>
+      <tr><td class="num">0x16</td><td>Цифрове підсилення</td><td class="num">0x30, 0xFF</td><td>Самотест, запит статусу</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Що відбувається в GUI</h3>
+  <div class="prose">
+    <ul>
+      <li><code>radar_protocol.py</code> шукає пакети по 0xAA…0x55, збирає карту 64 × 32 і відправляє команди. Не залежить від графіки, тому його зручно читати першим.</li>
+      <li><code>GUI_V65_Tk.py</code> є панеллю для підняття плати: теплова карта, CFAR, водоспад, запис і відтворення HDF5, демо-режим. <code>GUI_V7_PyQt.py</code> є повнішим інтерфейсом з мапою.</li>
+      <li><code>v7/processing.py</code> продовжує там, де закінчилась FPGA: кластеризація сусідніх детекцій, асоціація з треками, трекінг, корекція кута місця за нахилом з IMU.</li>
+      <li><code>polar_to_geographic</code> перетворює (дальність, азимут, кут місця) і позицію GPS на координати на мапі.</li>
+    </ul>
+  </div>
+
+  <h3>Як перевіряється ланцюг</h3>
+  <div class="grid2">
+    <div class="card"><h4>Програмна копія FPGA</h4><p class="mono">v7/software_fpga.py</p><p>Побітова копія всього ланцюга на Python: decimator → MTI → Doppler → DC notch → CFAR. Керується тими ж регістрами, тож GUI може працювати без плати.</p></div>
+    <div class="card"><h4>Золоті еталони</h4><p class="mono">tb/cosim/real_data/golden_reference.py</p><p>Еталон з точною арифметикою RTL, перевірений на реальних записах радара ADI CN0566 (10,525 ГГц). Читається як специфікація кожного етапу.</p></div>
+    <div class="card"><h4>Регресія RTL</h4><p class="mono">9_2_FPGA/run_regression.sh</p><p>Лінт і всі тестбенчі на Icarus Verilog. <code>--quick</code> пропускає довгі інтеграційні тести.</p></div>
+    <div class="card"><h4>Формальна перевірка</h4><p class="mono">9_2_FPGA/formal/</p><p>SymbiYosys доводить властивості синхронізаторів між доменами, контролера режимів, децимації і доплерівського процесора.</p></div>
+    <div class="card"><h4>Контракт між шарами</h4><p class="mono">tests/cross_layer/</p><p>Перевіряє, що опкоди і формати однакові в Verilog, прошивці STM32 і Python.</p></div>
+    <div class="card"><h4>Тести STM32</h4><p class="mono">9_1_Microcontroller/tests</p><p>Модульні тести прошивки, запускаються через <code>make test</code>.</p></div>
+  </div>
+
+  <h3>Що спробувати далі</h3>
+  <div class="prose">
+    <ol>
+      <li>Прочитай <code>radar_receiver_final.v</code> від початку до кінця і знайди кожен блок з цього курсу.</li>
+      <li>Відкрий <code>golden_reference.py</code> і пройди функції <code>run_ddc</code> → <code>run_range_fft</code> → <code>run_range_bin_decimator</code> → <code>run_mti_canceller</code> → <code>run_doppler_fft</code> → <code>run_dc_notch</code> → <code>run_cfar_ca</code>. Це той самий ланцюг, що в лабораторії, але побітово точний.</li>
+      <li>Запусти <code>./run_regression.sh --quick</code> у <code>9_Firmware/9_2_FPGA</code> (потрібен <code>iverilog</code>) і подивись, які тести є.</li>
+      <li>Розберись з питаннями, позначеними в модулях 4, 6 і 8: вони стосуються реальних місць коду, які ще можуть потребувати доопрацювання.</li>
+    </ol>
+  </div>
+
+  <div class="repo"><h4>У репозиторії</h4><ul>
+    <li><a data-src="9_Firmware/9_2_FPGA/usb_data_interface_ft2232h.v">usb_data_interface_ft2232h.v</a><span>Пакування даних і прийом команд для FT2232H.</span></li>
+    <li><a data-src="9_Firmware/9_3_GUI/radar_protocol.py">radar_protocol.py</a><span>Розбір пакетів, опкоди, запис, потік збору даних.</span></li>
+    <li><a data-src="9_Firmware/9_3_GUI/GUI_V65_Tk.py">GUI_V65_Tk.py</a><span>Панель для підняття плати.</span></li>
+    <li><a data-src="9_Firmware/9_3_GUI/v7/software_fpga.py">v7/software_fpga.py</a><span>Програмний двійник FPGA.</span></li>
+    <li><a data-src="9_Firmware/9_2_FPGA/run_regression.sh">run_regression.sh</a><span>Запуск усіх тестбенчів.</span></li>
+  </ul></div>
+
+  <div class="quiz" data-mod="m9"><h4>Самоперевірка <small>3 питання</small></h4>
+    <div class="q" data-a="2"><p>Скільки байт у пакеті даних FPGA → ПК і чим він починається?</p><div class="opts"><button class="opt">4 байти, 0xBB</button><button class="opt">26 байт, 0xAA</button><button class="opt">11 байт, 0xAA</button></div><p class="why" hidden>0xAA, 9 байт корисних даних, 0x55.</p></div>
+    <div class="q" data-a="0"><p>Як перевірити зміну CFAR без плати?</p><div class="opts"><button class="opt">Через <code>software_fpga.py</code> або <code>golden_reference.py</code> і тестбенч <code>tb_cfar_ca.v</code></button><button class="opt">Ніяк, лише на залізі</button><button class="opt">Через STM32</button></div><p class="why" hidden>Для цього в репозиторії і є побітові Python-моделі та тестбенчі.</p></div>
+    <div class="q" data-a="1"><p>Де відбувається трекінг цілей?</p><div class="opts"><button class="opt">У FPGA після CFAR</button><button class="opt">У Python, <code>v7/processing.py</code></button><button class="opt">У STM32</button></div><p class="why" hidden>FPGA закінчується на детекціях. Кластеризація, асоціація і трекінг живуть у GUI.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ LAB -->
+<section class="mod" id="lab" data-title="Лабораторія">
+  <header class="mod-head">
+    <span class="eyebrow">Лабораторія · увесь ланцюг разом</span>
+    <h2>Від луни до детекції</h2>
+    <p class="lead">Спрощена модель одного підкадру AERIS-10: 64 біни по 24 м, 16 chirp з PRI 167 мкс. Задай цілі, увімкни кліпер, MTI і CFAR, і подивись, що виявиться.</p>
+  </header>
+  <div class="callout">Модель не побітова: цілі потрапляють у свій бін дальності, шум гаусів з одиничною потужністю, кліпер нерухомий з невеликим розкидом фази. Для точного відтворення FPGA використовуй <code>software_fpga.py</code>.</div>
+
+  <div class="lab">
+    <div class="lab-title"><h4>Цілі</h4><span class="tag">дальність 0–1536 м, швидкість ±80 м/с</span></div>
+    <div class="table-wrap"><table class="tgt-table">
+      <thead><tr><th>Увімк.</th><th>Дальність, м</th><th>Швидкість, м/с</th><th>SNR на імпульс, дБ</th></tr></thead>
+      <tbody id="tgtBody"></tbody>
+    </table></div>
+    <div class="controls">
+      <div class="ctl"><label class="check" for="l_clut"><input type="checkbox" id="l_clut" checked> Відбиття від землі</label><label for="l_clv">Рівень кліпера, дБ <output id="o_clv"></output></label><input type="range" id="l_clv" min="10" max="50" step="1" value="35"></div>
+      <div class="ctl"><label class="check" for="l_mti"><input type="checkbox" id="l_mti"> MTI (1 − z⁻¹)</label><label class="check" for="l_win"><input type="checkbox" id="l_win" checked> Вікно Хеммінга</label><label for="l_notch">DC notch, ±біни <output id="o_notch"></output></label><input type="range" id="l_notch" min="0" max="3" step="1" value="0"></div>
+      <div class="ctl"><label class="check" for="l_cfar"><input type="checkbox" id="l_cfar"> CFAR (інакше простий поріг)</label><label for="l_mode">Режим</label><select id="l_mode"><option value="CA">CA</option><option value="GO">GO</option><option value="SO">SO</option></select></div>
+      <div class="ctl"><label for="l_g">Захисні G <output id="o_g2"></output></label><input type="range" id="l_g" min="0" max="8" step="1" value="2"><label for="l_t">Навчальні T <output id="o_t2"></output></label><input type="range" id="l_t" min="1" max="16" step="1" value="8"></div>
+      <div class="ctl"><label for="l_a">α (до середнього), дБ <output id="o_a2"></output></label><input type="range" id="l_a" min="3" max="20" step="0.5" value="10"><label for="l_thr">Простий поріг, дБ <output id="o_thr"></output></label><input type="range" id="l_thr" min="0" max="50" step="1" value="15"></div>
+      <div class="ctl"><label for="l_seed">Реалізація шуму <output id="o_seed"></output></label><input type="range" id="l_seed" min="1" max="20" step="1" value="1"><span class="why" id="alphaFpga"></span></div>
+    </div>
+    <div class="grid2">
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><canvas class="plot tall" id="rdPlot"></canvas><span class="why">Карта |I|+|Q|, дБ. Натисни на стовпець, щоб побачити його розріз праворуч. Обведені клітинки є детекціями.</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><canvas class="plot tall" id="cutPlot"></canvas><div class="legend"><span><i style="background:var(--trace)"></i>сигнал у стовпці</span><span><i style="background:var(--hot)"></i>поріг</span></div></div>
+    </div>
+    <div class="readout"><div><span>Детекцій</span><b id="r_ndet"></b></div><div><span>Із них хибних</span><b id="r_nfa"></b></div><div><span>Пропущено цілей</span><b id="r_miss"></b></div></div>
+    <pre class="det-list" id="detList"></pre>
+    <div class="btnrow">
+      <button class="btn small" data-lab="m6">Сценарій: сира карта</button>
+      <button class="btn small" data-lab="m7">Сценарій: MTI</button>
+      <button class="btn small" data-lab="m8">Сценарій: MTI + CFAR</button>
+    </div>
+  </div>
+  <div class="prose">
+    <h3>Що спробувати</h3>
+    <ul>
+      <li>Без MTI кліпер на нульовій швидкості перекриває ближні біни, і простий поріг дає купу хибних детекцій. Увімкни MTI і подивись, що стало з ціллю на 3 м/с.</li>
+      <li>Задай швидкість 55 м/с і знайди, в якому біні опинилась ціль. Це загортання через однозначну швидкість ±42,8 м/с.</li>
+      <li>Постав дві цілі поруч (наприклад 600 і 650 м з однаковою швидкістю) і порівняй CA, GO і SO.</li>
+      <li>Зменш α і рахуй хибні тривоги, гортаючи реалізації шуму.</li>
+    </ul>
+  </div>
+</section>
+
+    <nav class="pager" aria-label="Перехід між модулями">
+      <a class="btn" id="prevBtn" href="#">← Назад</a>
+      <a class="btn primary" id="nextBtn" href="#">Далі →</a>
+    </nav>
+  </main>
+</div>
+
+<script>
+(function () {
+'use strict';
+const REPO = 'https://github.com/qitech/PLFM_RADAR/blob/main/';
+const C = 3e8, F0 = 10.5e9, LAMBDA = C / F0;
+const $ = (id) => document.getElementById(id);
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const fmt = (x, d = 1) => x.toLocaleString('uk-UA', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+/* ---------- посилання на файли ---------- */
+document.querySelectorAll('a[data-src]').forEach(a => {
+  a.href = REPO + a.dataset.src.split('/').map(encodeURIComponent).join('/');
+  a.target = '_blank'; a.rel = 'noopener';
+});
+
+/* ---------- навігація і прогрес ---------- */
+const mods = [...document.querySelectorAll('section.mod')];
+const quizMods = mods.filter(m => m.querySelector('.quiz')).map(m => m.id);
+let done = {};
+try { done = JSON.parse(localStorage.getItem('aeris-course-done') || '{}') || {}; } catch (e) { done = {}; }
+const saveDone = () => { try { localStorage.setItem('aeris-course-done', JSON.stringify(done)); } catch (e) {} };
+
+const toc = $('tocList');
+mods.forEach((m, i) => {
+  const li = document.createElement('li');
+  const a = document.createElement('a');
+  a.href = '#' + m.id; a.dataset.id = m.id;
+  a.innerHTML = '<span class="n">' + (m.id === 'lab' ? '▶' : String(i + 1).padStart(2, '0')) + '</span><span></span><span class="done" aria-label="пройдено">✓</span>';
+  a.children[1].textContent = m.dataset.title;
+  li.appendChild(a); toc.appendChild(li);
+});
+function refreshProgress() {
+  const n = quizMods.filter(id => done[id]).length;
+  $('progBar').style.width = (100 * n / quizMods.length) + '%';
+  $('progText').textContent = n + ' / ' + quizMods.length;
+  toc.querySelectorAll('a').forEach(a => a.classList.toggle('is-done', !!done[a.dataset.id]));
+}
+let current = null;
+function show(id, scroll) {
+  const idx = Math.max(0, mods.findIndex(m => m.id === id));
+  mods.forEach((m, i) => m.classList.toggle('active', i === idx));
+  current = mods[idx].id;
+  toc.querySelectorAll('a').forEach(a => a.setAttribute('aria-current', a.dataset.id === current ? 'true' : 'false'));
+  const prev = mods[idx - 1], next = mods[idx + 1];
+  $('prevBtn').hidden = !prev; $('nextBtn').hidden = !next;
+  if (prev) { $('prevBtn').href = '#' + prev.id; $('prevBtn').textContent = '← ' + prev.dataset.title; }
+  if (next) { $('nextBtn').href = '#' + next.id; $('nextBtn').textContent = next.dataset.title + ' →'; }
+  try { localStorage.setItem('aeris-course-last', current); } catch (e) {}
+  if (scroll) window.scrollTo({ top: 0 });
+  requestAnimationFrame(redrawVisible);
+}
+window.addEventListener('hashchange', () => show(location.hash.slice(1), true));
+document.querySelectorAll('[data-go]').forEach(el => el.addEventListener('click', () => { location.hash = el.dataset.go; }));
+
+/* ---------- квізи ---------- */
+document.querySelectorAll('.quiz').forEach(qz => {
+  const modId = qz.dataset.mod;
+  const qs = [...qz.querySelectorAll('.q')];
+  qs.forEach(q => {
+    const ans = +q.dataset.a;
+    const opts = [...q.querySelectorAll('.opt')];
+    opts.forEach((o, i) => o.addEventListener('click', () => {
+      opts.forEach(x => x.classList.remove('right', 'wrong'));
+      o.classList.add(i === ans ? 'right' : 'wrong');
+      if (i !== ans) opts[ans].classList.add('right');
+      q.querySelector('.why').hidden = false;
+      q.dataset.ok = (i === ans) ? '1' : (q.dataset.ok || '0');
+      if (qs.every(x => x.dataset.ok === '1')) { done[modId] = true; saveDone(); refreshProgress(); }
+    }));
+  });
+});
+
+/* ---------- полотно і графіки ---------- */
+function setupCanvas(cv) {
+  const r = cv.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const w = Math.max(10, Math.round(r.width)), h = Math.max(10, Math.round(r.height));
+  if (cv.width !== w * dpr || cv.height !== h * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h };
+}
+function niceTicks(a, b, n) {
+  const span = b - a, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(s => s * mag).find(s => span / s <= n) || 10 * mag;
+  const t = []; for (let v = Math.ceil(a / step) * step; v <= b + 1e-9; v += step) t.push(+v.toFixed(10));
+  return t;
+}
+function linePlot(cv, o) {
+  const { ctx, w, h } = setupCanvas(cv);
+  const P = { l: 52, r: 14, t: 12, b: 34 };
+  const pw = w - P.l - P.r, ph = h - P.t - P.b;
+  const X = x => P.l + (x - o.xmin) / (o.xmax - o.xmin) * pw;
+  const Y = y => P.t + (1 - (Math.min(Math.max(y, o.ymin), o.ymax) - o.ymin) / (o.ymax - o.ymin)) * ph;
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '11px ' + css('--font-mono'); ctx.lineWidth = 1;
+  const grid = css('--line'), muted = css('--muted');
+  ctx.strokeStyle = grid; ctx.fillStyle = muted;
+  ctx.textAlign = 'center';
+  (o.xticks || niceTicks(o.xmin, o.xmax, Math.max(3, Math.floor(pw / 80)))).forEach(t => {
+    const x = X(t); ctx.beginPath(); ctx.moveTo(x, P.t); ctx.lineTo(x, P.t + ph); ctx.stroke();
+    ctx.fillText((o.xfmt || String)(t), x, P.t + ph + 14);
+  });
+  ctx.textAlign = 'right';
+  niceTicks(o.ymin, o.ymax, Math.max(3, Math.floor(ph / 45))).forEach(t => {
+    const y = Y(t); ctx.beginPath(); ctx.moveTo(P.l, y); ctx.lineTo(P.l + pw, y); ctx.stroke();
+    ctx.fillText(String(t), P.l - 6, y + 4);
+  });
+  ctx.textAlign = 'center'; ctx.fillText(o.xlabel || '', P.l + pw / 2, h - 4);
+  ctx.save(); ctx.translate(12, P.t + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(o.ylabel || '', 0, 0); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(P.l, P.t, pw, ph); ctx.clip();
+  (o.series || []).forEach(s => {
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.width || 1.6; ctx.setLineDash(s.dash || []);
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < s.x.length; i++) {
+      const xx = X(s.x[i]), yy = Y(s.y[i]);
+      if (s.step) { if (!started) { ctx.moveTo(xx, yy); started = true; } else { ctx.lineTo(xx, Y(s.y[i - 1])); ctx.lineTo(xx, yy); } }
+      else { if (!started) { ctx.moveTo(xx, yy); started = true; } else ctx.lineTo(xx, yy); }
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+  });
+  (o.hlines || []).forEach(l => { ctx.strokeStyle = l.color; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(P.l, Y(l.y)); ctx.lineTo(P.l + pw, Y(l.y)); ctx.stroke(); ctx.setLineDash([]); });
+  (o.vlines || []).forEach(l => { ctx.strokeStyle = l.color; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(X(l.x), P.t); ctx.lineTo(X(l.x), P.t + ph); ctx.stroke(); ctx.setLineDash([]); });
+  (o.points || []).forEach(p => { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(X(p.x), Y(p.y), 4, 0, 2 * Math.PI); ctx.fill(); });
+  ctx.restore();
+  return { X, Y, P, pw, ph };
+}
+
+/* ---------- FFT (радикс-2, на місці) ---------- */
+function fft(re, im, inv) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = 2 * Math.PI / len * (inv ? 1 : -1), wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const a = i + k, b = a + len / 2;
+        const tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+        const ncr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = ncr;
+      }
+    }
+  }
+  if (inv) for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+}
+const db = (x) => 10 * Math.log10(Math.max(x, 1e-30));
+
+function bindOut(id, outId, f) { const el = $(id), o = $(outId); const up = () => { o.textContent = f(el.value); }; el.addEventListener('input', up); up(); }
+
+/* ---------- M2: енергетика ---------- */
+function snrAt(R, p) {
+  const G = Math.pow(10, p.g / 10), FL = Math.pow(10, p.fl / 10);
+  return p.pt * G * G * LAMBDA * LAMBDA * p.rcs * p.tau * p.n / (Math.pow(4 * Math.PI, 3) * Math.pow(R, 4) * 4e-21 * FL);
+}
+function drawSNR() {
+  const p = { pt: +$('s_pt').value, g: +$('s_g').value, rcs: +$('s_rcs').value, tau: $('s_tau').value * 1e-6, n: +$('s_n').value, fl: +$('s_fl').value };
+  const xs = [], ys = [];
+  for (let r = 0.2; r <= 25.0001; r += 0.1) { xs.push(r); ys.push(db(snrAt(r * 1000, p))); }
+  const snr3 = db(snrAt(3000, p));
+  const rmax = Math.pow(snrAt(1000, p) / Math.pow(10, 1.3), 0.25) * 1000;
+  linePlot($('snrPlot'), { xmin: 0, xmax: 25, ymin: -20, ymax: 60, xlabel: 'дальність, км', ylabel: 'SNR, дБ',
+    series: [{ x: xs, y: ys, color: css('--trace') }], hlines: [{ y: 13, color: css('--hot') }], vlines: [{ x: 3, color: css('--muted') }] });
+  $('r_snr3').textContent = fmt(snr3) + ' дБ';
+  $('r_rmax').textContent = fmt(rmax / 1000, 2) + ' км';
+  $('r_bt').textContent = fmt(10 * Math.log10(20e6 * p.tau)) + ' дБ (B = 20 МГц)';
+}
+bindOut('s_pt', 'o_pt', v => v + ' Вт'); bindOut('s_g', 'o_g', v => v);
+bindOut('s_tau', 'o_tau', v => v); bindOut('s_fl', 'o_fl', v => v);
+$('o_rcs').textContent = ''; $('o_n').textContent = '';
+['s_pt', 's_g', 's_rcs', 's_tau', 's_n', 's_fl'].forEach(id => $(id).addEventListener('input', drawSNR));
+
+/* ---------- M3: chirp і стиснення ---------- */
+const FS = 100e6;
+function drawChirp() {
+  const B = $('c_b').value * 1e6, T = $('c_t').value * 1e-6, win = $('c_win').checked, showRect = $('c_rect').checked;
+  const N = Math.round(T * FS), k = B / T;
+  // часовий вигляд chirp (реальна частина), показуємо перші до 600 відліків щоб було видно зміну частоти
+  const xs = [], ys = [];
+  const step = Math.max(1, Math.floor(N / 1500));
+  for (let n = 0; n < N; n += step) { const t = n / FS - T / 2; xs.push((n / FS) * 1e6); ys.push(Math.cos(Math.PI * k * t * t)); }
+  linePlot($('chirpPlot'), { xmin: 0, xmax: T * 1e6, ymin: -1.2, ymax: 1.2, xlabel: 'час, мкс', ylabel: 'Re s(t)', series: [{ x: xs, y: ys, color: css('--trace'), width: 1 }] });
+  // кореляція через FFT
+  let L = 1; while (L < 2 * N) L <<= 1;
+  const sr = new Float64Array(L), si = new Float64Array(L), rr = new Float64Array(L), ri = new Float64Array(L);
+  for (let n = 0; n < N; n++) {
+    const t = n / FS - T / 2, ph = Math.PI * k * t * t;
+    sr[n] = Math.cos(ph); si[n] = Math.sin(ph);
+    const w = win ? (0.54 - 0.46 * Math.cos(2 * Math.PI * n / Math.max(1, N - 1))) : 1;
+    rr[n] = w * Math.cos(ph); ri[n] = w * Math.sin(ph);
+  }
+  fft(sr, si); fft(rr, ri);
+  for (let i = 0; i < L; i++) { const a = sr[i], b = si[i], c = rr[i], d = -ri[i]; sr[i] = a * c - b * d; si[i] = a * d + b * c; }
+  fft(sr, si, true);
+  const mag = new Float64Array(L); let mx = 0;
+  for (let i = 0; i < L; i++) { mag[i] = Math.hypot(sr[i], si[i]); if (mag[i] > mx) mx = mag[i]; }
+  const span = Math.min(1.5e-6, T) ; const M = Math.round(span * FS);
+  const cx = [], cy = [];
+  for (let l = -M; l <= M; l++) { const idx = (l + L) % L; cx.push(l / FS * 1e6); cy.push(20 * Math.log10(Math.max(mag[idx] / mx, 1e-6))); }
+  // простий імпульс тієї ж тривалості: трикутник автокореляції
+  const rx = [], ry = [];
+  for (let l = -M; l <= M; l++) { const v = Math.max(0, 1 - Math.abs(l) / N); rx.push(l / FS * 1e6); ry.push(20 * Math.log10(Math.max(v, 1e-6))); }
+  const series = [{ x: cx, y: cy, color: css('--trace') }];
+  if (showRect) series.push({ x: rx, y: ry, color: css('--hot'), dash: [5, 4] });
+  linePlot($('mfPlot'), { xmin: -span * 1e6, xmax: span * 1e6, ymin: -60, ymax: 3, xlabel: 'затримка відносно піку, мкс', ylabel: 'дБ', series });
+  // ширина −3 дБ з інтерполяцією
+  const thr = mx / Math.SQRT2; let j = 0;
+  while (j < L / 2 && mag[j] >= thr) j++;
+  const frac = j > 0 ? (mag[j - 1] - thr) / (mag[j - 1] - mag[j]) : 0;
+  const wsamp = 2 * (j - 1 + frac);
+  const wsec = wsamp / FS;
+  $('r_mw').textContent = fmt(wsec * 1e9, 0) + ' нс';
+  $('r_mm').textContent = fmt(wsec * C / 2, 1) + ' м';
+  // перший бічний пелюсток: перший локальний мінімум, далі максимум
+  let i = j; while (i < L / 2 - 1 && mag[i + 1] < mag[i]) i++;
+  let sl = 0; for (let q = i; q < Math.min(L / 2, i + 4 * Math.ceil(FS / B) + 4); q++) sl = Math.max(sl, mag[q]);
+  $('r_sl').textContent = fmt(20 * Math.log10(sl / mx), 1) + ' дБ';
+  $('r_cbt').textContent = fmt(B * T, 0) + ' (' + fmt(10 * Math.log10(B * T), 1) + ' дБ)';
+}
+bindOut('c_b', 'o_cb', v => v); bindOut('c_t', 'o_ct', v => v);
+let chirpPending = false;
+['c_b', 'c_t', 'c_win', 'c_rect'].forEach(id => $(id).addEventListener('input', () => { if (!chirpPending) { chirpPending = true; requestAnimationFrame(() => { chirpPending = false; drawChirp(); }); } }));
+
+/* ---------- M4: множник решітки ---------- */
+function drawAF() {
+  const th0 = $('a_th').value * Math.PI / 180, N = +$('a_n').value, d = +$('a_d').value, quant = $('a_q').checked, taper = $('a_tap').checked;
+  const phases = [], codes = [];
+  for (let n = 0; n < N; n++) {
+    let ph = n * 2 * Math.PI * d * Math.sin(th0);
+    ph = ((ph % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const code = Math.floor(ph / (2 * Math.PI) * 128) % 128;   // як у calculatePhaseSettings: обрізання
+    codes.push(code);
+    phases.push(quant ? code * 2 * Math.PI / 128 : ph);
+  }
+  const w = []; for (let n = 0; n < N; n++) w.push(taper && N > 1 ? 0.54 - 0.46 * Math.cos(2 * Math.PI * n / (N - 1)) : 1);
+  const xs = [], ys = []; let mx = 0; const vals = [];
+  for (let a = -90; a <= 90.0001; a += 0.1) {
+    const s = Math.sin(a * Math.PI / 180); let re = 0, im = 0;
+    for (let n = 0; n < N; n++) { const p = n * 2 * Math.PI * d * s - phases[n]; re += w[n] * Math.cos(p); im += w[n] * Math.sin(p); }
+    const m = re * re + im * im; vals.push(m); xs.push(a); if (m > mx) mx = m;
+  }
+  vals.forEach(v => ys.push(db(v / mx)));
+  // ширина -3 дБ навколо максимуму
+  let pk = ys.indexOf(Math.max(...ys));
+  let l = pk, r = pk; while (l > 0 && ys[l] > -3) l--; while (r < ys.length - 1 && ys[r] > -3) r++;
+  const bw = (r - l) * 0.1;
+  // найвищий бічний: максимум поза головною пелюсткою (до перших мінімумів)
+  let ml = pk, mr = pk; while (ml > 0 && ys[ml - 1] < ys[ml]) ml--; while (mr < ys.length - 1 && ys[mr + 1] < ys[mr]) mr++;
+  let psl = -100; ys.forEach((y, i) => { if (i < ml || i > mr) psl = Math.max(psl, y); });
+  linePlot($('afPlot'), { xmin: -90, xmax: 90, ymin: -50, ymax: 2, xlabel: 'кут θ, градуси', ylabel: 'дБ', xticks: [-90, -60, -30, 0, 30, 60, 90],
+    series: [{ x: xs, y: ys, color: css('--trace') }], vlines: [{ x: +$('a_th').value, color: css('--hot') }] });
+  $('r_bw').textContent = fmt(bw, 1) + '°';
+  $('r_psl').textContent = fmt(psl, 1) + ' дБ';
+  $('r_codes').textContent = codes.slice(0, 4).join(', ');
+}
+bindOut('a_th', 'o_ath', v => v + '°'); bindOut('a_n', 'o_an', v => v); bindOut('a_d', 'o_ad', v => (+v).toFixed(2));
+['a_th', 'a_n', 'a_d', 'a_q', 'a_tap'].forEach(id => $(id).addEventListener('input', drawAF));
+
+/* ---------- CFAR схема ---------- */
+(function () {
+  const g = document.getElementById('cfarCells'); const ns = 'http://www.w3.org/2000/svg';
+  const kinds = ['t','t','t','t','t','t','t','g','g','c','g','g','t','t','t','t','t','t','t'];
+  kinds.forEach((k, i) => {
+    const r = document.createElementNS(ns, 'rect');
+    r.setAttribute('x', 20 + i * 43); r.setAttribute('y', 30); r.setAttribute('width', 38); r.setAttribute('height', 50); r.setAttribute('rx', 4);
+    r.setAttribute('class', 'blk' + (k === 't' ? ' fpga' : k === 'c' ? ' rf' : ''));
+    g.appendChild(r);
+  });
+})();
+
+/* ---------- Лабораторія ---------- */
+const NR = 64, NC = 16, DR = 24, PRI = 167e-6;
+const VUA = LAMBDA / (4 * PRI);
+const targets = [
+  { on: true, r: 300, v: 12, snr: 10 },
+  { on: true, r: 820, v: -25, snr: 5 },
+  { on: true, r: 1150, v: 3, snr: 8 },
+  { on: false, r: 500, v: 55, snr: 8 },
+  { on: false, r: 650, v: 12, snr: 8 },
+];
+const tb = $('tgtBody');
+targets.forEach((t, i) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><input type="checkbox" id="t' + i + 'on"' + (t.on ? ' checked' : '') + ' aria-label="увімкнути ціль ' + (i + 1) + '"></td>' +
+    '<td><input type="number" id="t' + i + 'r" min="0" max="1535" step="10" value="' + t.r + '" aria-label="дальність"></td>' +
+    '<td><input type="number" id="t' + i + 'v" min="-80" max="80" step="1" value="' + t.v + '" aria-label="швидкість"></td>' +
+    '<td><input type="number" id="t' + i + 's" min="-10" max="40" step="1" value="' + t.snr + '" aria-label="SNR"></td>';
+  tb.appendChild(tr);
+  ['on', 'r', 'v', 's'].forEach(k => $('t' + i + k).addEventListener('input', () => {
+    t.on = $('t' + i + 'on').checked; t.r = +$('t' + i + 'r').value; t.v = +$('t' + i + 'v').value; t.snr = +$('t' + i + 's').value; runLab();
+  }));
+});
+function rng(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+function gauss(r) { const u = Math.max(r(), 1e-12), v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+let selCol = null; let lab = null;
+function runLab() {
+  const P = {
+    clut: $('l_clut').checked, clv: +$('l_clv').value, mti: $('l_mti').checked, win: $('l_win').checked, notch: +$('l_notch').value,
+    cfar: $('l_cfar').checked, mode: $('l_mode').value, G: +$('l_g').value, T: +$('l_t').value, a: +$('l_a').value, thr: +$('l_thr').value, seed: +$('l_seed').value
+  };
+  const r = rng(P.seed * 7919 + 13);
+  const nPulses = P.mti ? NC + 1 : NC;
+  // x[r][n] комплексний
+  const xr = [], xi = [];
+  for (let b = 0; b < NR; b++) { xr.push(new Float64Array(nPulses)); xi.push(new Float64Array(nPulses)); }
+  for (let b = 0; b < NR; b++) for (let n = 0; n < nPulses; n++) { xr[b][n] = gauss(r) / Math.SQRT2; xi[b][n] = gauss(r) / Math.SQRT2; }
+  if (P.clut) {
+    for (let b = 0; b < NR; b++) {
+      const lvl = P.clv - b * 0.55 + 6 * (r() - 0.5);
+      if (lvl <= 0) continue;
+      const A = Math.pow(10, lvl / 20), ph0 = 2 * Math.PI * r();
+      for (let n = 0; n < nPulses; n++) { const ph = ph0 + 0.05 * gauss(r); const a = A * (1 + 0.02 * gauss(r)); xr[b][n] += a * Math.cos(ph); xi[b][n] += a * Math.sin(ph); }
+    }
+  }
+  const active = targets.filter(t => t.on && t.r >= 0 && t.r < NR * DR);
+  active.forEach(t => {
+    const b = Math.floor(t.r / DR), A = Math.pow(10, t.snr / 20), dphi = 2 * Math.PI * (2 * t.v / LAMBDA) * PRI, p0 = 2 * Math.PI * r();
+    for (let n = 0; n < nPulses; n++) { xr[b][n] += A * Math.cos(p0 + dphi * n); xi[b][n] += A * Math.sin(p0 + dphi * n); }
+  });
+  // MTI
+  const yr = [], yi = [];
+  for (let b = 0; b < NR; b++) {
+    const ar = new Float64Array(NC), ai = new Float64Array(NC);
+    for (let n = 0; n < NC; n++) {
+      if (P.mti) { ar[n] = xr[b][n + 1] - xr[b][n]; ai[n] = xi[b][n + 1] - xi[b][n]; }
+      else { ar[n] = xr[b][n]; ai[n] = xi[b][n]; }
+    }
+    yr.push(ar); yi.push(ai);
+  }
+  // Доплер FFT
+  const mag = []; // [b][k], k у порядку FPGA 0..15
+  for (let b = 0; b < NR; b++) {
+    const re = Float64Array.from(yr[b]), im = Float64Array.from(yi[b]);
+    for (let n = 0; n < NC; n++) { const w = P.win ? 0.54 - 0.46 * Math.cos(2 * Math.PI * n / (NC - 1)) : 1; re[n] *= w; im[n] *= w; }
+    fft(re, im);
+    const row = new Float64Array(NC);
+    for (let k = 0; k < NC; k++) {
+      const inNotch = P.notch > 0 && (k < P.notch || k > 15 - P.notch + 1);
+      row[k] = inNotch ? 0 : (Math.abs(re[k]) + Math.abs(im[k])) / 4;
+    }
+    mag.push(row);
+  }
+  // нормування до середнього рівня шуму (без цілей і кліпера) для зручної шкали
+  let sw2 = 0; for (let n = 0; n < NC; n++) { const w = P.win ? 0.54 - 0.46 * Math.cos(2 * Math.PI * n / (NC - 1)) : 1; sw2 += w * w; }
+  const noiseRef = Math.sqrt(sw2 * (P.mti ? 2 : 1)) * 1.128 / 4;   // E(|I|+|Q|) для гаусового шуму
+  // детекція
+  const thrMap = []; const dets = [];
+  const alpha = Math.pow(10, P.a / 10);
+  for (let b = 0; b < NR; b++) thrMap.push(new Float64Array(NC));
+  for (let k = 0; k < NC; k++) {
+    for (let b = 0; b < NR; b++) {
+      let thr;
+      if (P.cfar) {
+        let sl = 0, cl = 0, sr2 = 0, cr = 0;
+        for (let j = b - P.G - P.T; j < b - P.G; j++) if (j >= 0) { sl += mag[j][k]; cl++; }
+        for (let j = b + P.G + 1; j <= b + P.G + P.T; j++) if (j < NR) { sr2 += mag[j][k]; cr++; }
+        const ml = cl ? sl / cl : null, mr = cr ? sr2 / cr : null;
+        let Z;
+        if (ml === null) Z = mr; else if (mr === null) Z = ml;
+        else Z = P.mode === 'GO' ? Math.max(ml, mr) : P.mode === 'SO' ? Math.min(ml, mr) : (sl + sr2) / (cl + cr);
+        thr = Math.sqrt(alpha) * (Z || 0);   // α задається для потужності, а карта амплітудна
+      } else {
+        thr = noiseRef * Math.pow(10, P.thr / 20);
+      }
+      thrMap[b][k] = thr;
+      if (mag[b][k] > thr && mag[b][k] > 0) dets.push({ b, k });
+    }
+  }
+  lab = { mag, thrMap, dets, noiseRef, active, P };
+  // статистика
+  const kOf = v => { const fd = 2 * v / LAMBDA; let kk = Math.round(fd * PRI * NC); return ((kk % NC) + NC) % NC; };
+  const truth = active.map(t => ({ b: Math.floor(t.r / DR), k: kOf(t.v), t }));
+  const isTrue = d => truth.some(t => Math.abs(t.b - d.b) <= 0 && (Math.min(Math.abs(t.k - d.k), NC - Math.abs(t.k - d.k)) <= 1));
+  const nfa = dets.filter(d => !isTrue(d)).length;
+  const miss = truth.filter(t => !dets.some(d => d.b === t.b && Math.min(Math.abs(t.k - d.k), NC - Math.abs(t.k - d.k)) <= 1)).length;
+  $('r_ndet').textContent = dets.length; $('r_nfa').textContent = nfa; $('r_miss').textContent = miss + ' з ' + truth.length;
+  const velOf = k => { const ks = k >= NC / 2 ? k - NC : k; return ks * LAMBDA / (2 * NC * PRI); };
+  const lines = dets.slice(0, 40).map(d => 'біни (' + String(d.b).padStart(2) + ', ' + String(d.k).padStart(2) + ')  R ≈ ' + String(d.b * DR + DR / 2).padStart(5) + ' м   v ≈ ' + velOf(d.k).toFixed(1).padStart(6) + ' м/с   ' + (20 * Math.log10(lab.mag[d.b][d.k] / noiseRef)).toFixed(1).padStart(5) + ' дБ' + (isTrue(d) ? '' : '   хибна'));
+  $('detList').textContent = dets.length ? lines.join('\n') + (dets.length > 40 ? '\n… ще ' + (dets.length - 40) : '') : 'Детекцій немає.';
+  const aF = Math.sqrt(Math.pow(10, P.a / 10)) / (2 * P.T);   // амплітудний множник, поділений на кількість клітинок
+  $('alphaFpga').textContent = P.cfar ? 'Для FPGA (CA, поріг від суми): α ≈ ' + aF.toFixed(2) + ' → Q4.4 0x' + Math.min(255, Math.round(aF * 16)).toString(16).toUpperCase().padStart(2, '0') : '';
+  if (selCol === null) selCol = truth.length ? truth[0].k : 0;
+  drawLab();
+}
+function colormap(t) { // від темно-синього через бірюзовий до жовтого
+  t = Math.min(1, Math.max(0, t));
+  const stops = [[13, 22, 60], [30, 80, 140], [32, 150, 140], [120, 200, 90], [250, 225, 70]];
+  const p = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(p)), f = p - i;
+  return 'rgb(' + stops[i].map((c, j) => Math.round(c + f * (stops[i + 1][j] - c))).join(',') + ')';
+}
+const kToCol = k => (k + NC / 2) % NC;   // fftshift: від'ємні швидкості ліворуч
+const colToK = c => (c + NC / 2) % NC;
+let rdGeom = null;
+function drawLab() {
+  if (!lab) return;
+  const cv = $('rdPlot'); const { ctx, w, h } = setupCanvas(cv);
+  const P = { l: 48, r: 8, t: 10, b: 34 };
+  const pw = w - P.l - P.r, ph = h - P.t - P.b, cw = pw / NC, rh = ph / NR;
+  ctx.clearRect(0, 0, w, h);
+  const lo = -5, hi = 40;
+  for (let b = 0; b < NR; b++) for (let k = 0; k < NC; k++) {
+    const v = lab.mag[b][k] > 0 ? 20 * Math.log10(lab.mag[b][k] / lab.noiseRef) : lo;
+    ctx.fillStyle = colormap((v - lo) / (hi - lo));
+    ctx.fillRect(P.l + kToCol(k) * cw, P.t + (NR - 1 - b) * rh, Math.ceil(cw), Math.ceil(rh));
+  }
+  ctx.lineWidth = 2; ctx.strokeStyle = css('--hot');
+  lab.dets.forEach(d => ctx.strokeRect(P.l + kToCol(d.k) * cw + 1, P.t + (NR - 1 - d.b) * rh + 0.5, cw - 2, Math.max(1, rh - 1)));
+  if (selCol !== null) { ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.strokeRect(P.l + kToCol(selCol) * cw, P.t, cw, ph); ctx.setLineDash([]); }
+  ctx.fillStyle = css('--muted'); ctx.font = '11px ' + css('--font-mono'); ctx.textAlign = 'right';
+  [0, 500, 1000, 1500].forEach(m => { const y = P.t + ph - (m / (NR * DR)) * ph; ctx.fillText(String(m), P.l - 6, y + 4); });
+  ctx.textAlign = 'center';
+  const dv = LAMBDA / (2 * NC * PRI);
+  [-40, -20, 0, 20, 40].forEach(v => { const xx = P.l + (v / dv + NC / 2 + 0.5) * cw; ctx.fillText(String(v), xx, P.t + ph + 14); });
+  ctx.fillText('швидкість, м/с', P.l + pw / 2, h - 4);
+  ctx.save(); ctx.translate(12, P.t + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText('дальність, м', 0, 0); ctx.restore();
+  rdGeom = { P, cw, pw, ph };
+  // розріз
+  const k = selCol ?? 0, xs = [], ys = [], ts = [], pts = [];
+  for (let b = 0; b < NR; b++) {
+    xs.push(b * DR + DR / 2);
+    ys.push(lab.mag[b][k] > 0 ? 20 * Math.log10(lab.mag[b][k] / lab.noiseRef) : -10);
+    ts.push(lab.thrMap[b][k] > 0 ? 20 * Math.log10(lab.thrMap[b][k] / lab.noiseRef) : -10);
+  }
+  lab.dets.filter(d => d.k === k).forEach(d => pts.push({ x: d.b * DR + DR / 2, y: ys[d.b], color: css('--hot') }));
+  const kv = (k >= NC / 2 ? k - NC : k) * LAMBDA / (2 * NC * PRI);
+  linePlot($('cutPlot'), { xmin: 0, xmax: NR * DR, ymin: -10, ymax: 55, xlabel: 'дальність, м (стовпець v ≈ ' + kv.toFixed(1) + ' м/с, бін ' + k + ')', ylabel: 'дБ над шумом',
+    series: [{ x: xs, y: ys, color: css('--trace'), step: true }, { x: xs, y: ts, color: css('--hot'), dash: [5, 3], step: true }], points: pts });
+}
+$('rdPlot').addEventListener('click', e => {
+  if (!rdGeom) return; const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left - rdGeom.P.l; if (x < 0 || x > rdGeom.pw) return;
+  selCol = colToK(Math.floor(x / rdGeom.cw)); drawLab();
+});
+bindOut('l_clv', 'o_clv', v => v); bindOut('l_notch', 'o_notch', v => v); bindOut('l_g', 'o_g2', v => v); bindOut('l_t', 'o_t2', v => v);
+bindOut('l_a', 'o_a2', v => v); bindOut('l_thr', 'o_thr', v => v); bindOut('l_seed', 'o_seed', v => '#' + v);
+['l_clut', 'l_clv', 'l_mti', 'l_win', 'l_notch', 'l_cfar', 'l_mode', 'l_g', 'l_t', 'l_a', 'l_thr', 'l_seed'].forEach(id => $(id).addEventListener('input', runLab));
+
+const presets = {
+  m6: { l_clut: true, l_mti: false, l_cfar: false, l_notch: 0, l_thr: 15 },
+  m7: { l_clut: true, l_mti: true, l_cfar: false, l_notch: 0, l_thr: 15 },
+  m8: { l_clut: true, l_mti: true, l_cfar: true, l_notch: 1, l_mode: 'CA', l_g: 2, l_t: 8, l_a: 12 },
+};
+function applyPreset(name) {
+  const p = presets[name]; if (!p) return;
+  Object.entries(p).forEach(([id, v]) => { const el = $(id); if (el.type === 'checkbox') el.checked = v; else el.value = v; el.dispatchEvent(new Event('input')); });
+  runLab();
+}
+document.querySelectorAll('[data-lab]').forEach(b => b.addEventListener('click', () => { applyPreset(b.dataset.lab); if (current !== 'lab') location.hash = 'lab'; }));
+
+/* ---------- перемальовування ---------- */
+function redrawVisible() {
+  if (current === 'm2') drawSNR();
+  if (current === 'm3') drawChirp();
+  if (current === 'm4') drawAF();
+  if (current === 'lab') drawLab();
+}
+let rt = null; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(redrawVisible, 120); });
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+if (mq.addEventListener) mq.addEventListener('change', () => requestAnimationFrame(redrawVisible));
+new MutationObserver(() => requestAnimationFrame(redrawVisible)).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+refreshProgress();
+applyPreset('m6');
+let start = location.hash.slice(1);
+if (!mods.some(m => m.id === start)) { try { start = localStorage.getItem('aeris-course-last') || 'm1'; } catch (e) { start = 'm1'; } }
+show(start, false);
+})();
+</script>
+</body>
+</html>
